@@ -19,10 +19,10 @@ import React, { useContext, useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import styled from "styled-components";
 // import { ConnectButton, Icon, useNotification } from "web3uikit";
-import { searchFilterContext } from "../../Context";
+import { searchFilterContext } from "../Context";
 
-import logo from "../../images/airbnbRed.png";
-import mobileLogo from "../../images/mobileLogoRed.png";
+import logo from "../images/airbnbRed.png";
+import mobileLogo from "../images/mobileLogoRed.png";
 import { useNavigate } from "react-router-dom";
 
 const Details = () => {

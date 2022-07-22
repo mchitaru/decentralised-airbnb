@@ -1,36 +1,53 @@
 import chaiSetup from "./utils/chai_setup";
 import EVMRevert from "./utils/EVMRevert";
-import expectEvent from "./utils/expectEvent";
 
-const Reservation = artifacts.require("Reservation");
+import {expect} from "chai";
+import {ethers} from "hardhat";
 
 chaiSetup();
 
-contract("Reservation", ([owner, nobody]) => {
-  let reservation;
+describe("Reservation.sol", () => {
+
+  let ownerSig: any;
+  let nobodySig: any;
+  let owner: string;
+  let nobody: string;
+
+  let contractFactory: any;
+  let reservation: any;
+
+  before(async () => {
+
+    [ownerSig, nobodySig] = await ethers.getSigners();
+
+    owner = await ownerSig.getAddress();
+    nobody = await nobodySig.getAddress();
+    
+    console.log(owner);
+    console.log(nobody);
+  });
 
   describe("allows owner to", () => {
     beforeEach(async () => {
-      reservation = await Reservation.new();
+
+      contractFactory = await ethers.getContractFactory("Reservation");
+      reservation = await contractFactory.deploy();
     });
 
     it("reserve and emits Creation Event", async () => {
-      await expectEvent.inTransaction(
-        reservation.reserve(nobody, 0, 100, 200),
-        "Creation",
-        { _renter: nobody, _calendarId: 0, _tokenId: 0 }
-      );
-      (await reservation.ownerOf(0)).should.equal(nobody);
+
+      await expect(reservation.reserve(nobody, 0, 100, 200))
+      .to.emit(reservation, 'Creation')
+      .withArgs(nobody, 0, 0);     
     });
 
     it("cancel and emits Cancellation Event", async () => {
+
       await reservation.reserve(nobody, 0, 100, 200);
 
-      await expectEvent.inTransaction(
-        reservation.cancel(nobody, 0),
-        "Cancellation",
-        { _renter: nobody, _calendarId: 0, _tokenId: 0 }
-      );
+      await expect(reservation.cancel(nobody, 0))
+      .to.emit(reservation, 'Cancellation')
+      .withArgs(nobody, 0, 0);     
 
       // token no longer exists
       reservation.ownerOf(0).should.be.rejectedWith(EVMRevert);
@@ -39,47 +56,44 @@ contract("Reservation", ([owner, nobody]) => {
 
   describe("handles token id", () => {
     beforeEach(async () => {
-      reservation = await Reservation.new();
+      contractFactory = await ethers.getContractFactory("Reservation");
+      reservation = await contractFactory.deploy();
     });
 
     it("incrementing the id every time", async () => {
-      await expectEvent.inTransaction(
-        reservation.reserve(nobody, 0, 100, 200),
-        "Creation",
-        { _renter: nobody, _calendarId: 0, _tokenId: 0 }
-      );
-      await expectEvent.inTransaction(
-        reservation.reserve(nobody, 0, 400, 600),
-        "Creation",
-        { _renter: nobody, _calendarId: 0, _tokenId: 1 }
-      );
-      await expectEvent.inTransaction(
-        reservation.reserve(owner, 0, 600, 800),
-        "Creation",
-        { _renter: owner, _calendarId: 0, _tokenId: 2 }
-      );
-      await expectEvent.inTransaction(
-        reservation.reserve(owner, 1, 600, 800),
-        "Creation",
-        { _renter: owner, _calendarId: 1, _tokenId: 3 }
-      );
+
+      await expect(reservation.reserve(nobody, 0, 100, 200))
+      .to.emit(reservation, 'Creation')
+      .withArgs(nobody, 0, 0);     
+
+      await expect(reservation.reserve(nobody, 0, 400, 600))
+      .to.emit(reservation, 'Creation')
+      .withArgs(nobody, 0, 1);     
+
+      await expect(reservation.reserve(owner, 0, 600, 800))
+      .to.emit(reservation, 'Creation')
+      .withArgs(owner, 0, 2);     
+
+      await expect(reservation.reserve(owner, 1, 600, 800))
+      .to.emit(reservation, 'Creation')
+      .withArgs(owner, 1, 3);     
+
     });
 
     it("not affected by cancellation", async () => {
       await reservation.reserve(nobody, 0, 100, 200);
       await reservation.cancel(nobody, 0);
 
-      await expectEvent.inTransaction(
-        reservation.reserve(nobody, 0, 400, 600),
-        "Creation",
-        { _renter: nobody, _calendarId: 0, _tokenId: 1 }
-      );
+      await expect(reservation.reserve(nobody, 0, 400, 600))
+      .to.emit(reservation, 'Creation')
+      .withArgs(nobody, 0, 1);     
     });
   });
 
   describe("does not allow non-owner to", () => {
     beforeEach(async () => {
-      reservation = await Reservation.new();
+      contractFactory = await ethers.getContractFactory("Reservation");
+      reservation = await contractFactory.deploy();
     });
 
     it("reserve", async () => {

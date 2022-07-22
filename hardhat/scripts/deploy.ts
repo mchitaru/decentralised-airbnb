@@ -12,9 +12,7 @@ async function main() {
   await calendar.deployed();
   console.log("calendar deployed to:", calendar.address);
 
-  fs.writeFileSync('./config.js', `
-  export const marketplaceAddress = "${calendar.address}"
-  `)
+  fs.writeFileSync('../src/artifacts/config.js', `export const marketplaceAddress = "${calendar.address}"`)
 }
 
 main()

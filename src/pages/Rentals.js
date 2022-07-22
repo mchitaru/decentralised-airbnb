@@ -1,12 +1,12 @@
 import React, { createRef, useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import logo from "../../images/airbnbRed.png";
-import mobileLogo from "../../images/mobileLogoRed.png";
+import logo from "../images/airbnbRed.png";
+import mobileLogo from "../images/mobileLogoRed.png";
 import ReactLoading from "react-loading";
 // import { ConnectButton } from "web3uikit";
-import Map from "../../components/Map";
-import PlaceDetails from "../../components/PlaceDetails";
-import { searchFilterContext } from "../../Context";
+import Map from "../components/Map";
+import PlaceDetails from "../components/PlaceDetails";
+import { searchFilterContext } from "../Context";
 import {
   Box,
   Divider,
@@ -15,7 +15,7 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
-import SwipeableEdgeDrawer from "../../components/MobileDrawer";
+import SwipeableEdgeDrawer from "../components/MobileDrawer";
 // import { useMoralis } from "react-moralis";
 const Rentals = ({
   isLoading,

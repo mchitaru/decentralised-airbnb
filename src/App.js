@@ -1,10 +1,11 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
-import Rentals from "./pages/Rentals/Rentals";
+import Rentals from "./pages/Rentals";
+import Host from "./pages/Host";
 
 import { getData } from "./api";
-import Details from "./pages/Details/Details";
+import Details from "./pages/Details";
 import { searchFilterContext } from "./Context";
 import Trip from "./pages/Trip";
 
@@ -34,7 +35,7 @@ const App = () => {
       setPlaces(data?.filter((place) => place.name));
       setIsLoading(false);
     });
-    console.log(places);
+    // console.log(places);
   }, [bound]);
 
   return (
@@ -69,6 +70,7 @@ const App = () => {
       />
       <Route path="/details" element={<Details />} />
       <Route path="/trip" element={<Trip />} />
+      <Route path="/host" element={<Host />} />
     </Routes>
   );
 };
