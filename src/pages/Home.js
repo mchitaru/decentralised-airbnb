@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import bg from "../images/homeBg.jpg";
 import mobileLogo from "../images/mobileWhiteLogo.png";
@@ -17,6 +17,8 @@ import {
 import { searchFilterContext } from "../Context";
 import PersonIcon from "@mui/icons-material/Person";
 // import { useMoralis } from "react-moralis";
+import { ethers } from 'ethers'
+import Web3Modal from "web3modal" 
 
 const Home = ({ onLoad, onPlaceChanged }) => {
   let isMedium = useMediaQuery("(max-width:900px)");
@@ -31,7 +33,17 @@ const Home = ({ onLoad, onPlaceChanged }) => {
     guests,
     setGuests,
   } = useContext(searchFilterContext);
-  const { account } = true;//useMoralis();
+  const [account, setAccount] = useState(null);
+
+  useEffect(async () => {
+
+    const web3Modal = new Web3Modal();
+    const connection = await web3Modal.connect();
+    const provider = new ethers.providers.Web3Provider(connection);
+    
+    setAccount(provider.getSigner());
+
+  }, []);
 
   localStorage.setItem("destination", JSON.stringify(destination));
   localStorage.setItem("checkIn", checkIn);

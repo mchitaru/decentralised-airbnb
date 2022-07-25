@@ -12,10 +12,19 @@ import React, { useEffect, useState } from "react";
 // import { useMoralis, useWeb3ExecuteFunction } from "react-moralis";
 import { Link, useNavigate } from "react-router-dom";
 // import { ConnectButton } from "web3uikit";
+import { ethers } from 'ethers'
+import Web3Modal from "web3modal" 
+
+import {
+  calendarAddress
+} from '../artifacts/config' 
+
+import Calendar from '../artifacts/contracts/Calendar.sol/Calendar.json'
+
 import logo from "../images/airbnbRed.png";
 import mobileLogo from "../images/mobileLogoRed.png";
-const Trip = () => {
-  const { account } = true;//useMoralis();
+const Trip = ({trips}) => {
+  const [account, setAccount] = useState(null);
   let isMobile = useMediaQuery("(max-width:850px)");
   const styles = {
     logo: {
@@ -32,62 +41,25 @@ const Trip = () => {
     },
   };
   const navigate = useNavigate();
-  const [trips, setTrips] = useState([]);
+  // const [trips, setTrips] = useState([]);
   const contractProcessor = null;//useWeb3ExecuteFunction();
   const allBooking = async () => {
-    let options = {
-      contractAddress: process.env.REACT_APP_CONTRACT_ADDRESS,
-      functionName: "showMyBookings",
-      abi: [
-        {
-          inputs: [],
-          name: "showMyBookings",
-          outputs: [
-            {
-              components: [
-                {
-                  internalType: "string",
-                  name: "name",
-                  type: "string",
-                },
-                {
-                  internalType: "string",
-                  name: "destination",
-                  type: "string",
-                },
-                {
-                  internalType: "string",
-                  name: "checkIn",
-                  type: "string",
-                },
-                {
-                  internalType: "string",
-                  name: "checkOut",
-                  type: "string",
-                },
-                {
-                  internalType: "string",
-                  name: "imageUrl",
-                  type: "string",
-                },
-              ],
-              internalType: "struct aibnb.BookingDetails[]",
-              name: "",
-              type: "tuple[]",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-      ],
-      params: {},
-    };
-    const data = await contractProcessor.fetch({
-      params: options,
-    });
-    setTrips(...trips, data);
+
+
+    // setTrips(...trips, data);
   };
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(async () => {
+
+    const web3Modal = new Web3Modal();
+    const connection = await web3Modal.connect();
+    const provider = new ethers.providers.Web3Provider(connection);
+    
+    setAccount(provider.getSigner());
+
+  }, []);
+
   useEffect(() => {
     setIsLoading(true);
     allBooking();

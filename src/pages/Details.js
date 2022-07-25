@@ -25,6 +25,16 @@ import logo from "../images/airbnbRed.png";
 import mobileLogo from "../images/mobileLogoRed.png";
 import { useNavigate } from "react-router-dom";
 
+import { create as ipfsHttpClient } from 'ipfs-http-client'
+import { BigNumber, ethers } from 'ethers'
+import Web3Modal from "web3modal" 
+
+import {
+  calendarAddress
+} from '../artifacts/config' 
+
+import Calendar from '../artifacts/contracts/Calendar.sol/Calendar.json'
+
 const Details = () => {
   const rentalsList = {
     attributes: {
@@ -45,13 +55,14 @@ const Details = () => {
   const navigate = useNavigate();
   const { state: place } = useLocation();
 
+  const [available, setAvailable] = useState(true);
   const [noOfDays, setNoOfDays] = useState();
   // const { Moralis, account } = true;//useMoralis();
-  const { account } = true;
+  const [account, setAccount] = useState(null);
   // const contractProcessor = useWeb3ExecuteFunction();
 
   //****************************  code for no of days ***********************************
-  useEffect(() => {
+  useEffect(async () => {
     var today = new Date(
       checkIn.split("-")[0],
       checkIn.split("-")[1] - 1,
@@ -68,6 +79,18 @@ const Details = () => {
     var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
 
     setNoOfDays(diffDays);
+
+    try{
+
+      const contract = new ethers.Contract(calendarAddress, Calendar.abi, account);                
+      const available = await contract.isAvailable(place.token, (new Date(checkIn)).getTime(), (new Date(checkOut)).getTime());        
+  
+      setAvailable(available);  
+
+    }catch(e){
+      setAvailable(false);
+    }
+
   }, [checkIn, checkOut]);
 
   //***********************************   Styles *****************************************
@@ -126,7 +149,67 @@ const Details = () => {
     },
   };
 
+  function isBook() {
+    return window.location.pathname === '/details';
+  }
+
+  function isWrap() {
+    return window.location.pathname === '/wrap';
+  }
+
   // ****************** Connecting with Blockchain and functions **************************
+
+  useEffect(async () => {
+
+    const web3Modal = new Web3Modal();
+    const connection = await web3Modal.connect();
+    const provider = new ethers.providers.Web3Provider(connection);
+    
+    setAccount(provider.getSigner());
+
+  }, []);
+
+  async function uploadToIPFS(place) {
+
+    const data = JSON.stringify(place);
+
+    try {
+      const added = await client.add(data)
+      const url = `https://ipfs.infura.io/ipfs/${added.path}`
+      /* after metadata is uploaded to IPFS, return the URL to use it in the transaction */
+      return url
+    } catch (error) {
+      console.log('Error uploading file: ', error)
+    }  
+
+    return '';
+  }
+
+  const listProperty = async (place) => {
+
+    if(account != null){
+
+      setLoading(true);
+
+      const url = uploadToIPFS(place);
+
+      console.log(`Url: ${url}`);
+
+      try{
+
+        const contract = new ethers.Contract(calendarAddress, Calendar.abi, account);
+        const transaction = await contract.mint(url);
+        await transaction.wait();  
+  
+      }catch(e){
+        console.log("Error during contract call!")
+      }
+      
+      setLoading(false);
+    }
+  }
+
+  const client = ipfsHttpClient('https://ipfs.infura.io:5001/api/v0');
 
   const dayPrice = place.rating ? Number(place.rating) / 50 : 0.07;
   const [loading, setLoading] = useState(false);
@@ -157,68 +240,25 @@ const Details = () => {
     // });
   };
 
-  const bookRental = async (name, destination, checkIn, checkOut, imageUrl) => {
-    let options = {
-      contractAddress: process.env.REACT_APP_CONTRACT_ADDRESS,
-      functionName: "addNewBooking",
-      abi: [
-        {
-          inputs: [
-            {
-              internalType: "string",
-              name: "name",
-              type: "string",
-            },
-            {
-              internalType: "string",
-              name: "destination",
-              type: "string",
-            },
-            {
-              internalType: "string",
-              name: "checkIn",
-              type: "string",
-            },
-            {
-              internalType: "string",
-              name: "checkOut",
-              type: "string",
-            },
-            {
-              internalType: "string",
-              name: "imageUrl",
-              type: "string",
-            },
-          ],
-          name: "addNewBooking",
-          outputs: [],
-          stateMutability: "payable",
-          type: "function",
-        },
-      ],
-      params: {
-        name,
-        destination,
-        checkIn,
-        checkOut,
-        imageUrl,
-      },
-      // msgValue: Moralis.Units.ETH(dayPrice * noOfDays),
-      msgValue: (dayPrice * noOfDays),
-    };
-    setLoading(true);
+  const bookRental = async (place, checkIn, checkOut) => {
 
-    // await contractProcessor.fetch({
-    //   params: options,
-    //   onSuccess: () => {
-    //     handleSuccess();
-    //   },
-    //   onError: (error) => {
-    //     handleError(error.data.message);
-    //   },
-    // });
+    if(account != null){
 
-    setLoading(false);
+      setLoading(true);
+
+      try{
+
+        const contract = new ethers.Contract(calendarAddress, Calendar.abi, account);
+
+        const transaction = await contract.reserve(place.token, (new Date(checkIn)).getTime(), (new Date(checkOut)).getTime());
+        await transaction.wait();  
+
+      }catch(e){
+        console.log("Error during contract call!")
+      }
+      
+      setLoading(false);
+    }
   };
 
   return (
@@ -391,16 +431,20 @@ const Details = () => {
               </Box>
               <LoadingButton
                 loading={loading}
+                disabled = {isBook() && !available}
                 onClick={() => {
-                  if (account)
-                    bookRental(
-                      place.name,
-                      place.location_string,
-                      checkIn,
-                      checkOut,
-                      place.photo.images.original.url
-                    );
-                  else handleAccount();
+                  isBook()?
+                    bookRental(place, checkIn, checkOut):
+                    listProperty(place);
+                  // if (account)
+                  //   bookRental(
+                  //     place.name,
+                  //     place.location_string,
+                  //     checkIn,
+                  //     checkOut,
+                  //     place.photo.images.original.url
+                  //   );
+                  // else handleAccount();
                 }}
                 variant="text"
                 sx={{
@@ -544,16 +588,21 @@ const Details = () => {
                 <LoadingButton
                   fullWidth
                   loading={loading}
+                  disabled = {isBook() && !available}
                   onClick={() => {
-                    if (account)
-                      bookRental(
-                        place.name,
-                        place.location_string,
-                        checkIn,
-                        checkOut,
-                        place.photo.images.original.url
-                      );
-                    else handleAccount();
+                    isBook()?
+                    bookRental(place, checkIn, checkOut):
+                    listProperty(place);
+                  //   if (account)
+                  //     bookRental(
+                  //       place.name,
+                  //       place.location_string,
+                  //       checkIn,
+                  //       checkOut,
+                  //       place.photo.images.original.url
+                  //     );
+                  //   else handleAccount();
+                  // 
                   }}
                   variant="text"
                   sx={{
@@ -565,7 +614,7 @@ const Details = () => {
                     },
                   }}
                 >
-                  Book Now
+                  {isWrap()?"Wrap":"Book Now"}
                 </LoadingButton>
               </Box>
             </Box>

@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { Rating, Button, Box, useMediaQuery } from "@mui/material";
 import styled from "styled-components";
 
-const PlaceDetails = ({ selected, place, refProp, isMobile }) => {
+const PlaceDetails = ({ selected, place, refProp, isMobile, isWraps }) => {
   const isSmall = useMediaQuery("(max-width:420px)");
   const rentalsList = {
     attributes: {
@@ -163,7 +163,7 @@ const PlaceDetails = ({ selected, place, refProp, isMobile }) => {
           </Box>
           <Box sx={styles.bottomButton}>
             <Link
-              to={"/details"}
+              to={isWraps?"/wrap":"/details"}
               style={{ textDecoration: "none" }}
               state={place}
             >
@@ -178,7 +178,7 @@ const PlaceDetails = ({ selected, place, refProp, isMobile }) => {
                   },
                 }}
               >
-                Details
+                {isWraps?"Wrap":"Details"}
               </Button>
             </Link>
             <Box sx={styles.price}>

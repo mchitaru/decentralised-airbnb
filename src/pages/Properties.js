@@ -1,6 +1,5 @@
 import React, { createRef, useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import AddIcon from "@mui/icons-material/Add";
 import logo from "../images/airbnbRed.png";
 import mobileLogo from "../images/mobileLogoRed.png";
 import ReactLoading from "react-loading";
@@ -8,6 +7,8 @@ import ReactLoading from "react-loading";
 import Map from "../components/Map";
 import PlaceDetails from "../components/PlaceDetails";
 import { searchFilterContext } from "../Context";
+import { create as ipfsHttpClient } from 'ipfs-http-client'
+
 import {
   Box,
   Divider,
@@ -18,7 +19,16 @@ import {
 import PersonIcon from "@mui/icons-material/Person";
 import SwipeableEdgeDrawer from "../components/MobileDrawer";
 // import { useMoralis } from "react-moralis";
-const Rentals = ({
+import { ethers } from 'ethers'
+import Web3Modal from "web3modal" 
+
+import {
+  calendarAddress
+} from '../artifacts/config' 
+
+import Calendar from '../artifacts/contracts/Calendar.sol/Calendar.json'
+
+const Properties = ({
   isLoading,
   places,
   coordinates,
@@ -63,18 +73,9 @@ const Rentals = ({
     return () => {};
   }, []);
   const [elRefs, setElRefs] = useState([]);
+  const [account, setAccount] = useState(null);
 
-  function isRentals() {
-    return window.location.pathname === '/rentals';
-  }
-
-  function isProperties() {
-    return window.location.pathname === '/properties';
-  }
-
-  function isWraps() {
-    return window.location.pathname === '/wraps';
-  }
+  const client = ipfsHttpClient('https://ipfs.infura.io:5001/api/v0');
 
   if (autocomplete) {
     localStorage.setItem(
@@ -87,13 +88,22 @@ const Rentals = ({
     );
   }
 
+  useEffect(async () => {
+
+    const web3Modal = new Web3Modal();
+    const connection = await web3Modal.connect();
+    const provider = new ethers.providers.Web3Provider(connection);
+    
+    setAccount(provider.getSigner());
+
+  }, []);
+
   useEffect(() => {
     const lat = JSON.parse(localStorage.getItem("lat"));
     const lng = JSON.parse(localStorage.getItem("lng"));
-    setCoordinates({ lat, lng });    
+    setCoordinates({ lat, lng });
   }, []);
 
-  const { account } = true;//useMoralis();
   const navigate = useNavigate();
   useEffect(() => {
     setElRefs((refs) =>
@@ -102,6 +112,36 @@ const Rentals = ({
         .map((_, i) => refs[i] || createRef())
     );
   }, [places]);
+
+  async function uploadToIPFS(place) {
+
+    const data = JSON.stringify(place);
+
+    try {
+      const added = await client.add(data)
+      const url = `https://ipfs.infura.io/ipfs/${added.path}`
+      /* after metadata is uploaded to IPFS, return the URL to use it in the transaction */
+      return url
+    } catch (error) {
+      console.log('Error uploading file: ', error)
+    }  
+
+    return '';
+  }
+
+  const listProperty = async (place) => {
+
+    if(account != null){
+
+      const url = uploadToIPFS(place);
+
+      console.log(`Url: ${url}`);
+
+      const contract = new ethers.Contract(calendarAddress, Calendar.abi, account);
+      await contract.mint(url);
+      
+    }
+  }
 
   const styles = {
     logo: {
@@ -203,7 +243,6 @@ const Rentals = ({
             />
           </Link>
         </Box>
-        {isRentals() &&
         <Box sx={styles.searchReminder}>
           <Typography varient="body1" sx={styles.filter}>
             {destination.split(",")[0]}
@@ -223,43 +262,7 @@ const Rentals = ({
           <Typography varient="body1" sx={styles.filter}>
             {guests} Guest
           </Typography>
-        </Box>}
-        {isProperties() && <Box sx={styles.searchReminder}>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              backgroundColor: "#EB4E5F",
-              padding: "0px",
-              borderRadius: "60%",
-              marginRight: "5px",
-              ...(isMobile && {
-                width: "60vw",
-                borderRadius: "0.5rem",
-                justifyContent: "center",
-
-                cursor: "pointer",
-              }),
-            }}
-            onClick={() => navigate("/wraps")}
-          >
-            <IconButton onClick={() => navigate("/wraps")}>
-              <AddIcon
-                sx={{
-                  color: "white",
-                  ...(isMobile && {
-                    mr: 2,
-                  }),
-                }}
-              />
-              {isMobile && (
-                <Typography variant="body1" color="white">
-                  Search
-                </Typography>
-              )}
-            </IconButton>
-          </Box>
-        </Box>}
+        </Box>
         <Box display="flex">
           {/* <ConnectButton /> */}
           {account && (
@@ -315,7 +318,8 @@ const Rentals = ({
                       place={place}
                       selected={Number(childClicked) === i}
                       refProp={elRefs[i]}
-                      isWraps={isWraps()}
+                      isMobile={false}
+                      handleAction={listProperty}
                     />
                   </Box>
                 </Box>
@@ -338,4 +342,4 @@ const Rentals = ({
   );
 };
 
-export default Rentals;
+export default Properties;

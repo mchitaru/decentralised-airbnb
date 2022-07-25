@@ -14,14 +14,13 @@ contract Calendar is IERC809, Pausable, ERC721Enumerable, ERC721URIStorage {
   using TreeMap for TreeMap.Map;
 
   // limit reservation duration to 8 hours because we do not have spam protection yet
-  uint256 constant public RESERVATION_DURATION_LIMIT = 8 hours * 1000;
+  uint256 constant public RESERVATION_DURATION_LIMIT = 8760 hours * 1000;
 
   // mapping of token(calendar) id to mapping from start/end timestamp of a reservation to its id
   mapping(uint256 => TreeMap.Map) public startTimestampsMap;
 
   // address of the ERC721 contract tokenizing reseravation/access of this contract's token
-  address public reservationContract;
-  
+  address public reservationContract;  
 
   constructor() ERC721("Calendar", "CAL") {
     reservationContract = address(new Reservation());

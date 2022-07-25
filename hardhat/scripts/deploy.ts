@@ -12,7 +12,11 @@ async function main() {
   await calendar.deployed();
   console.log("calendar deployed to:", calendar.address);
 
-  fs.writeFileSync('../src/artifacts/config.js', `export const marketplaceAddress = "${calendar.address}"`)
+  const reservationAddress = await calendar.reservationContract();
+  console.log("reservation deployed to:", reservationAddress);
+
+  fs.writeFileSync('../src/artifacts/config.js', 
+    `export const calendarAddress = "${calendar.address}" \nexport const reservationAddress = "${reservationAddress}"`)
 }
 
 main()

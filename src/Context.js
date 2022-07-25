@@ -8,8 +8,9 @@ const Context = ({ children }) => {
     new Date().toISOString().split("T")[0]
   );
 
+  const now = new Date();
   const [checkOut, setCheckOut] = useState(
-    new Date().toISOString().split("T")[0]
+    new Date(new Date(now).setDate(now.getDate() + 1)).toISOString().split("T")[0]
   );
   //  const [destination,setDestination] = useState('')
   const [guests, setGuests] = useState(2);
