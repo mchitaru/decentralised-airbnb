@@ -110,6 +110,7 @@ const App = () => {
 
     if(account != null){
 
+      const calendar = new ethers.Contract(calendarAddress, Calendar.abi, account);
       const contract = new ethers.Contract(reservationAddress, Reservation.abi, account);
       const address = await account.getAddress();
 
@@ -120,14 +121,14 @@ const App = () => {
       for(let i = 0; i < balance; i++){
 
         const tokenId = await contract.tokenOfOwnerByIndex(address, i);
-        const tokenURI = await contract.tokenURI(tokenId);
-        console.log(tokenURI);
+        const {reservationId, startTime, stopTime, calendarId} = await calendar.reservationOfOwnerByIndex(address, i);
+        const tokenURI = await calendar.tokenURI(calendarId);
+        const meta = await axios.get(tokenURI);
 
-        if(tokenURI){
-          const meta = await axios.get(tokenURI);
+        const checkIn = Number(ethers.utils.formatUnits(startTime, 0));
+        const checkOut = Number(ethers.utils.formatUnits(stopTime, 0));
 
-          tokens.push({...meta.data, token: tokenId});  
-        }
+        tokens.push({...meta.data, token: tokenId, checkIn: new Date(checkIn).toDateString(), checkOut: new Date(checkOut).toDateString()});  
       }
 
       setTrips(tokens);

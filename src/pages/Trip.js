@@ -41,13 +41,7 @@ const Trip = ({trips}) => {
     },
   };
   const navigate = useNavigate();
-  // const [trips, setTrips] = useState([]);
   const contractProcessor = null;//useWeb3ExecuteFunction();
-  const allBooking = async () => {
-
-
-    // setTrips(...trips, data);
-  };
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(async () => {
@@ -59,12 +53,6 @@ const Trip = ({trips}) => {
     setAccount(provider.getSigner());
 
   }, []);
-
-  useEffect(() => {
-    setIsLoading(true);
-    allBooking();
-    setIsLoading(false);
-  }, [account]);
 
   return (
     <Box>
@@ -111,7 +99,7 @@ const Trip = ({trips}) => {
         ) : trips ? (
           <Box sx={{ mt: "2rem" }}>
             <Grid container spacing={0}>
-              {trips?.map((trip) => (
+              {trips?.map((trip) => (              
                 <Grid
                   item
                   xs={12}
@@ -123,7 +111,9 @@ const Trip = ({trips}) => {
                   }}
                 >
                   <img
-                    src={trip.imageUrl}
+                    src={trip.photo
+                      ? trip.photo.images.large.url
+                      : "https://imgs.search.brave.com/eoIZlg2L0ttNGXCr45Nq_l3TtsSqY7MQ3YlS5n6jIqs/rs:fit:789:883:1/g:ce/aHR0cHM6Ly9sZWlm/ZXJwcm9wZXJ0aWVz/LmNvbS93cC1jb250/ZW50L3VwbG9hZHMv/Tk8tSU1BR0UtQVZB/SUxBQkxFLmpwZw"}
                     alt="place"
                     style={{
                       width: "100%",
@@ -137,7 +127,7 @@ const Trip = ({trips}) => {
                       {trip.name}
                     </Typography>
                     <Typography variant="body2" color="gray">
-                      From {trip.checkIn} to {trip.checkOut}
+                      From <b>{trip.checkIn}</b> to <b>{trip.checkOut}</b>
                     </Typography>
                   </center>
                 </Grid>
