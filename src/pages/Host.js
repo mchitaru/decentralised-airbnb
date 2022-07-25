@@ -15,7 +15,6 @@ import {
   // import { ConnectButton } from "web3uikit";
   import logo from "../images/airbnbRed.png";
   import mobileLogo from "../images/mobileLogoRed.png";
-  import Properties from "../components/Properties";
 
   import { ethers } from 'ethers'
   import Web3Modal from "web3modal" 
@@ -54,7 +53,7 @@ import {
       if(account != null){
 
         const contract = new ethers.Contract(marketplaceAddress, Calendar.abi, account);
-        await contract.mint();
+        await contract.mint("https://pinepipe.com/wp-content/uploads/2020/11/1.-Client-1.png");
       }
     }
     const loadProperties = async () => {
@@ -68,18 +67,20 @@ import {
 
         console.log(`Balance: ${balance}`);
 
-        let tokenIds = [];
+        let tokens = [];
 
         for(let i = 0; i < balance; i++){
 
-          const token = await contract.tokenOfOwnerByIndex(address, i);
-          console.log(ethers.utils.formatUnits(token, 0));
-          tokenIds.push(ethers.utils.formatUnits(token, 0));
+          const tokenId = await contract.tokenOfOwnerByIndex(address, i);
+          const tokenURI = await contract.tokenURI(tokenId);
+          //const meta = await axios.get(tokenURI);
+
+          tokens.push({id:ethers.utils.formatUnits(tokenId, 0), uri: tokenURI});
         }
 
-        setProperties(tokenIds);
+        setProperties(tokens);
   
-        console.log(`TokenIds: ${tokenIds}`);
+        console.log(`TokenIds: ${tokens}`);
         // const items = await Promise.all(data.map(async i => {
         //   const tokenURI = await contract.tokenURI(i.tokenId)
         //   const meta = await axios.get(tokenURI)
@@ -146,7 +147,8 @@ import {
             sx={{ mt: "2rem", mb: "2rem" }}
             color="initial"
           >
-            Host
+            Properties
+            <Button onClick={createProperty}>+</Button>
           </Typography>
 
           <Divider />
@@ -173,7 +175,7 @@ import {
                     }}
                   >
                     <img
-                      src={logo}
+                      src={property.uri}
                       alt="place"
                       style={{
                         width: "100%",
@@ -184,7 +186,7 @@ import {
                     />
                     <center>
                       <Typography variant="body1" color="initial">
-                        {property}
+                        {property.id}
                       </Typography>
                       <Typography variant="body2" color="gray">
                         From 22.07.2022 to 27.05.2024

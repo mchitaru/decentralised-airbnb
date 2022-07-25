@@ -17,6 +17,7 @@ describe("Calendar.sol", () => {
   let contractFactory: any;
   let calendar: any;
   const nullAddress = "0x0000000000000000000000000000000000000000";
+  const URI = "https://pinepipe.com/wp-content/uploads/2020/11/1.-Client-1.png";
 
   before(async () => {
 
@@ -37,7 +38,7 @@ describe("Calendar.sol", () => {
       contractFactory = await ethers.getContractFactory("Calendar");
       calendar = await contractFactory.deploy();
       
-      await calendar.mint();
+      await calendar.mint(URI);
     });
 
     it("requires stop time to be after start time", async () => {
@@ -141,8 +142,8 @@ describe("Calendar.sol", () => {
       contractFactory = await ethers.getContractFactory("Calendar");
       calendar = await contractFactory.deploy();
 
-      await calendar.mint();
-      await calendar.mint();
+      await calendar.mint(URI);
+      await calendar.mint(URI);
 
       await calendar.connect(renter1Sig).reserve(0, 1000, 2000);
       await calendar.connect(renter1Sig).reserve(0, 3000, 3500);
@@ -189,7 +190,7 @@ describe("Calendar.sol", () => {
       contractFactory = await ethers.getContractFactory("Calendar");
       calendar = await contractFactory.deploy();
 
-      await calendar.mint();
+      await calendar.mint(URI);
 
       await calendar.connect(renter1Sig).reserve(0, 1000, 2000);
       await calendar.connect(renter1Sig).reserve(0, 3000, 3500);
@@ -221,8 +222,8 @@ describe("Calendar.sol", () => {
       contractFactory = await ethers.getContractFactory("Calendar");
       calendar = await contractFactory.deploy();
 
-      await calendar.mint();
-      await calendar.mint();
+      await calendar.mint(URI);
+      await calendar.mint(URI);
 
       await calendar.connect(renter1Sig).reserve(0, 1000, 2000);
       await calendar.connect(renter1Sig).reserve(0, 3000, 3500);

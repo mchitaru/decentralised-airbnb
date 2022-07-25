@@ -4,12 +4,13 @@ pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "./treemap/TreeMap.sol";
 import "./Reservation.sol";
 import "./IERC809.sol";
 import "hardhat/console.sol";
 
-contract Calendar is IERC809, Pausable, ERC721Enumerable {
+contract Calendar is IERC809, Pausable, ERC721Enumerable, ERC721URIStorage {
   using TreeMap for TreeMap.Map;
 
   // limit reservation duration to 8 hours because we do not have spam protection yet
@@ -20,17 +21,55 @@ contract Calendar is IERC809, Pausable, ERC721Enumerable {
 
   // address of the ERC721 contract tokenizing reseravation/access of this contract's token
   address public reservationContract;
+  
 
   constructor() ERC721("Calendar", "CAL") {
     reservationContract = address(new Reservation());
   }
 
+  function _beforeTokenTransfer(
+      address from,
+      address to,
+      uint256 tokenId
+  ) internal
+    override(ERC721, ERC721Enumerable) 
+  {
+      super._beforeTokenTransfer(from, to, tokenId);
+  }
+  
+  function supportsInterface(bytes4 interfaceId)
+      public
+      view
+      override(ERC721, ERC721Enumerable, IERC165)
+      returns (bool)
+  {
+      return super.supportsInterface(interfaceId);
+  }
+
+  function _burn(uint256 _tokenId)
+  internal
+    override(ERC721, ERC721URIStorage)
+  {
+    super._burn(_tokenId);
+  } 
+
+  function tokenURI(uint256 tokenId)
+    public 
+    view 
+    override(ERC721, ERC721URIStorage) 
+    returns (string memory) 
+  {    
+    return super.tokenURI(tokenId);
+  }
+
   /// @notice Create a new calendar token
-  function mint()
+  function mint(string memory _tokenURI)
   public
   whenNotPaused()
   {
-    super._mint(msg.sender, totalSupply());
+    uint256 _tokenId = totalSupply();
+    super._mint(msg.sender, _tokenId);
+    super._setTokenURI(_tokenId, _tokenURI);
   }
 
   /// @notice Destroy a calendar token
@@ -39,7 +78,7 @@ contract Calendar is IERC809, Pausable, ERC721Enumerable {
   public
   whenNotPaused()
   {
-    super._burn(_tokenId);
+    _burn(_tokenId);
   }
 
   /// @notice Query if token `_tokenId` if available to reserve between `_start` and `_stop` time

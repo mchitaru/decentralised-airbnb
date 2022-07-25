@@ -4,7 +4,6 @@ pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
 
-
 /// @title ERC809: a standard interface for rentable rival non-fungible tokens.
 interface IERC809 is IERC721Enumerable {
   // address of the ERC721 contract tokenizing reseravation/access of this contract's token
