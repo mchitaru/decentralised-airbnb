@@ -134,46 +134,49 @@ const App = () => {
 
   useEffect(async () => {
 
-    const web3Modal = new Web3Modal();
-    const connection = await web3Modal.connect();
-    const provider = new ethers.providers.Web3Provider(connection);
-    const accounts = await provider.listAccounts();
+    try{
 
-    setProvider(provider);    
-    setAccount(accounts[0]);
+      const web3Modal = new Web3Modal();
+      const connection = await web3Modal.connect();
+      const provider = new ethers.providers.Web3Provider(connection);
+      const accounts = await provider.listAccounts();  
 
-  }, []);
+      setProvider(provider);    
+      setAccount(accounts[0]);  
 
-  useEffect(() => {
-    if (provider) {
-      const handleAccountsChanged = (accounts) => {
-        setAccount(accounts[0]);
-        console.log(accounts[0]);
-      };
+      if (connection) {
+        const handleAccountsChanged = (accounts) => {
+          setAccount(accounts[0]);
+          console.log("account changed...")
+        };
+    
+        const handleChainChanged = (chainId) => {
+          console.log("chain changed...")
+        };
+    
+        const handleDisconnect = () => {
+          setProvider(null);
+          setAccount(null);
+          console.log("disconnected...")
+        };
+    
+        connection.on("accountsChanged", handleAccountsChanged);
+        connection.on("chainChanged", handleChainChanged);
+        connection.on("disconnect", handleDisconnect);
+    
+        return () => {
+          if (connection.removeListener) {
+            connection.removeListener("accountsChanged", handleAccountsChanged);
+            connection.removeListener("chainChanged", handleChainChanged);
+            connection.removeListener("disconnect", handleDisconnect);
+          }
+        };
+      }
   
-      const handleChainChanged = (chainId) => {
-        console.log("chain changed...")
-      };
-  
-      const handleDisconnect = () => {
-        setProvider(null);
-        setAccount(null);
-        console.log("disconnected...")
-      };
-  
-      provider.on("accountsChanged", handleAccountsChanged);
-      provider.on("chainChanged", handleChainChanged);
-      provider.on("disconnect", handleDisconnect);
-  
-      return () => {
-        if (provider.removeListener) {
-          provider.removeListener("accountsChanged", handleAccountsChanged);
-          provider.removeListener("chainChanged", handleChainChanged);
-          provider.removeListener("disconnect", handleDisconnect);
-        }
-      };
+    }catch(e){
+
     }
-  }, [provider]);  
+  }, []);
 
   useEffect(() => {
     setIsLoading(true);
