@@ -23,8 +23,9 @@ import Calendar from '../artifacts/contracts/Calendar.sol/Calendar.json'
 
 import logo from "../images/airbnbRed.png";
 import mobileLogo from "../images/mobileLogoRed.png";
-const Trip = ({trips}) => {
-  const [account, setAccount] = useState(null);
+
+const Trip = ({account, provider, trips}) => {
+
   let isMobile = useMediaQuery("(max-width:850px)");
   const styles = {
     logo: {
@@ -43,16 +44,6 @@ const Trip = ({trips}) => {
   const navigate = useNavigate();
   const contractProcessor = null;//useWeb3ExecuteFunction();
   const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(async () => {
-
-    const web3Modal = new Web3Modal();
-    const connection = await web3Modal.connect();
-    const provider = new ethers.providers.Web3Provider(connection);
-    
-    setAccount(provider.getSigner());
-
-  }, []);
 
   return (
     <Box>

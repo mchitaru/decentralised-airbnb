@@ -35,7 +35,7 @@ import {
 
 import Calendar from '../artifacts/contracts/Calendar.sol/Calendar.json'
 
-const Details = () => {
+const Details = ({account, provider}) => {
   const rentalsList = {
     attributes: {
       unoDescription: "2 Guests • 2 Beds • 1 Rooms",
@@ -57,8 +57,6 @@ const Details = () => {
 
   const [available, setAvailable] = useState(true);
   const [noOfDays, setNoOfDays] = useState();
-  // const { Moralis, account } = true;//useMoralis();
-  const [account, setAccount] = useState(null);
   // const contractProcessor = useWeb3ExecuteFunction();
 
   //****************************  code for no of days ***********************************
@@ -82,13 +80,14 @@ const Details = () => {
 
     try{
 
-      const contract = new ethers.Contract(calendarAddress, Calendar.abi, account);                
-      const available = await contract.isAvailable(place.token, (new Date(checkIn)).getTime(), (new Date(checkOut)).getTime());        
-  
+      const contract = new ethers.Contract(calendarAddress, Calendar.abi, provider.getSigner());                
+      const available = await contract.isAvailable(place.token, (new Date(checkIn)).getTime(), (new Date(checkOut)).getTime());  
+      
       setAvailable(available);  
 
     }catch(e){
       setAvailable(false);
+      console.log("Copntract call error!");
     }
 
   }, [checkIn, checkOut]);
@@ -159,16 +158,6 @@ const Details = () => {
 
   // ****************** Connecting with Blockchain and functions **************************
 
-  useEffect(async () => {
-
-    const web3Modal = new Web3Modal();
-    const connection = await web3Modal.connect();
-    const provider = new ethers.providers.Web3Provider(connection);
-    
-    setAccount(provider.getSigner());
-
-  }, []);
-
   async function uploadToIPFS(place) {
 
     const data = JSON.stringify(place);
@@ -197,7 +186,7 @@ const Details = () => {
 
       try{
 
-        const contract = new ethers.Contract(calendarAddress, Calendar.abi, account);
+        const contract = new ethers.Contract(calendarAddress, Calendar.abi, provider.getSigner());
         const transaction = await contract.mint(url);
         await transaction.wait();  
   
@@ -248,7 +237,7 @@ const Details = () => {
 
       try{
 
-        const contract = new ethers.Contract(calendarAddress, Calendar.abi, account);
+        const contract = new ethers.Contract(calendarAddress, Calendar.abi, provider.getSigner());
 
         const transaction = await contract.reserve(place.token, (new Date(checkIn)).getTime(), (new Date(checkOut)).getTime());
         await transaction.wait();  
@@ -258,6 +247,8 @@ const Details = () => {
       }
       
       setLoading(false);
+
+      navigate("/trip");
     }
   };
 

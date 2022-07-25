@@ -17,8 +17,10 @@ import {
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import SwipeableEdgeDrawer from "../components/MobileDrawer";
-// import { useMoralis } from "react-moralis";
+
 const Rentals = ({
+  account,
+  provider,
   isLoading,
   places,
   coordinates,
@@ -93,7 +95,6 @@ const Rentals = ({
     setCoordinates({ lat, lng });    
   }, []);
 
-  const { account } = true;//useMoralis();
   const navigate = useNavigate();
   useEffect(() => {
     setElRefs((refs) =>

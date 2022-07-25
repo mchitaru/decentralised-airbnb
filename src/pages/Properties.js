@@ -29,6 +29,8 @@ import {
 import Calendar from '../artifacts/contracts/Calendar.sol/Calendar.json'
 
 const Properties = ({
+  account,
+  provider,
   isLoading,
   places,
   coordinates,
@@ -73,7 +75,6 @@ const Properties = ({
     return () => {};
   }, []);
   const [elRefs, setElRefs] = useState([]);
-  const [account, setAccount] = useState(null);
 
   const client = ipfsHttpClient('https://ipfs.infura.io:5001/api/v0');
 
@@ -87,16 +88,6 @@ const Properties = ({
       JSON.stringify(autocomplete.getPlace().geometry.location.lng())
     );
   }
-
-  useEffect(async () => {
-
-    const web3Modal = new Web3Modal();
-    const connection = await web3Modal.connect();
-    const provider = new ethers.providers.Web3Provider(connection);
-    
-    setAccount(provider.getSigner());
-
-  }, []);
 
   useEffect(() => {
     const lat = JSON.parse(localStorage.getItem("lat"));
@@ -137,7 +128,7 @@ const Properties = ({
 
       console.log(`Url: ${url}`);
 
-      const contract = new ethers.Contract(calendarAddress, Calendar.abi, account);
+      const contract = new ethers.Contract(calendarAddress, Calendar.abi, provider.getSigner());
       await contract.mint(url);
       
     }

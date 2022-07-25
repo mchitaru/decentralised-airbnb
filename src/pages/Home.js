@@ -20,7 +20,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import { ethers } from 'ethers'
 import Web3Modal from "web3modal" 
 
-const Home = ({ onLoad, onPlaceChanged }) => {
+const Home = ({ account, provider, onLoad, onPlaceChanged }) => {
   let isMedium = useMediaQuery("(max-width:900px)");
   let isMobile = useMediaQuery("(max-width:750px)");
 
@@ -33,17 +33,6 @@ const Home = ({ onLoad, onPlaceChanged }) => {
     guests,
     setGuests,
   } = useContext(searchFilterContext);
-  const [account, setAccount] = useState(null);
-
-  useEffect(async () => {
-
-    const web3Modal = new Web3Modal();
-    const connection = await web3Modal.connect();
-    const provider = new ethers.providers.Web3Provider(connection);
-    
-    setAccount(provider.getSigner());
-
-  }, []);
 
   localStorage.setItem("destination", JSON.stringify(destination));
   localStorage.setItem("checkIn", checkIn);

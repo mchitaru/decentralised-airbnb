@@ -84,18 +84,16 @@ const App = () => {
 
   const loadProperties = async () => {
 
-    if(account != null){
+    if(account){
 
-      const contract = new ethers.Contract(calendarAddress, Calendar.abi, account);
-      const address = await account.getAddress();
-
-      const balance = ethers.utils.formatUnits(await contract.balanceOf(address));
+      const contract = new ethers.Contract(calendarAddress, Calendar.abi, provider.getSigner());
+      const balance = ethers.utils.formatUnits(await contract.balanceOf(account));
 
       let tokens = [];
 
       for(let i = 0; i < balance; i++){
 
-        const tokenId = await contract.tokenOfOwnerByIndex(address, i);
+        const tokenId = await contract.tokenOfOwnerByIndex(account, i);
         const tokenURI = await contract.tokenURI(tokenId);
         const meta = await axios.get(tokenURI);
 
@@ -108,20 +106,19 @@ const App = () => {
 
   const loadTrips = async () => {
 
-    if(account != null){
+    if(account){
 
-      const calendar = new ethers.Contract(calendarAddress, Calendar.abi, account);
-      const contract = new ethers.Contract(reservationAddress, Reservation.abi, account);
-      const address = await account.getAddress();
+      const calendar = new ethers.Contract(calendarAddress, Calendar.abi, provider.getSigner());
+      const contract = new ethers.Contract(reservationAddress, Reservation.abi, provider.getSigner());
 
-      const balance = ethers.utils.formatUnits(await contract.balanceOf(address), 0);
+      const balance = ethers.utils.formatUnits(await contract.balanceOf(account), 0);
 
       let tokens = [];
 
       for(let i = 0; i < balance; i++){
 
-        const tokenId = await contract.tokenOfOwnerByIndex(address, i);
-        const {reservationId, startTime, stopTime, calendarId} = await calendar.reservationOfOwnerByIndex(address, i);
+        const tokenId = await contract.tokenOfOwnerByIndex(account, i);
+        const {reservationId, startTime, stopTime, calendarId} = await calendar.reservationOfOwnerByIndex(account, i);
         const tokenURI = await calendar.tokenURI(calendarId);
         const meta = await axios.get(tokenURI);
 
@@ -140,11 +137,43 @@ const App = () => {
     const web3Modal = new Web3Modal();
     const connection = await web3Modal.connect();
     const provider = new ethers.providers.Web3Provider(connection);
+    const accounts = await provider.listAccounts();
 
-    setProvider(provider);
-    setAccount(provider.getSigner());
+    setProvider(provider);    
+    setAccount(accounts[0]);
 
   }, []);
+
+  useEffect(() => {
+    if (provider) {
+      const handleAccountsChanged = (accounts) => {
+        setAccount(accounts[0]);
+        console.log(accounts[0]);
+      };
+  
+      const handleChainChanged = (chainId) => {
+        console.log("chain changed...")
+      };
+  
+      const handleDisconnect = () => {
+        setProvider(null);
+        setAccount(null);
+        console.log("disconnected...")
+      };
+  
+      provider.on("accountsChanged", handleAccountsChanged);
+      provider.on("chainChanged", handleChainChanged);
+      provider.on("disconnect", handleDisconnect);
+  
+      return () => {
+        if (provider.removeListener) {
+          provider.removeListener("accountsChanged", handleAccountsChanged);
+          provider.removeListener("chainChanged", handleChainChanged);
+          provider.removeListener("disconnect", handleDisconnect);
+        }
+      };
+    }
+  }, [provider]);  
 
   useEffect(() => {
     setIsLoading(true);
@@ -165,7 +194,7 @@ const App = () => {
     setIsLoading(true);
     loadRentals();
     setIsLoading(false);
-  }, [bound, provider]);
+  }, [bound, account]);
 
   return (
     <Routes>
@@ -173,6 +202,8 @@ const App = () => {
         path="/"
         element={
           <Home
+            account={account}
+            provider={provider}
             onLoad={onLoad}
             onPlaceChanged={onPlaceChanged}
             destination={destination}
@@ -183,6 +214,8 @@ const App = () => {
         path="/rentals"
         element={
           <Rentals
+            account={account}
+            provider={provider}
             isLoading={isLoading}
             autocomplete={autocomplete}
             bound={bound}
@@ -197,13 +230,40 @@ const App = () => {
           />
         }
       />
-      <Route path="/details" element={<Details />} />
-      <Route path="/wrap" element={<Details />} />
-      <Route path="/trip" element={<Trip trips={trips}/>} />
+      <Route 
+        path="/details" 
+        element={
+          <Details 
+            account={account}
+            provider={provider}
+          />
+        } 
+      />
+      <Route 
+        path="/wrap" 
+        element={
+          <Details 
+            account={account}
+            provider={provider}
+          />
+        } 
+      />
+      <Route 
+        path="/trip" 
+        element={
+          <Trip 
+            account={account}
+            provider={provider}
+            trips={trips}
+          />
+        } 
+      />
       <Route
         path="/properties"
         element={
           <Rentals
+            account={account}
+            provider={provider}
             isLoading={isLoading}
             autocomplete={autocomplete}
             setAutocomplete={setAutocomplete}
@@ -221,6 +281,8 @@ const App = () => {
         path="/wraps"
         element={
           <Rentals
+            account={account}
+            provider={provider}
             isLoading={isLoading}
             autocomplete={autocomplete}
             setAutocomplete={setAutocomplete}
