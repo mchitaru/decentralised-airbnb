@@ -3,8 +3,9 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Rating, Button, Box, useMediaQuery } from "@mui/material";
 import styled from "styled-components";
+import { Divider } from "antd";
 
-const PlaceDetails = ({ selected, place, refProp, isMobile }) => {
+const TripDetails = ({ selected, trip, refProp, isMobile }) => {
   const isSmall = useMediaQuery("(max-width:420px)");
   const rentalsList = {
     attributes: {
@@ -12,18 +13,6 @@ const PlaceDetails = ({ selected, place, refProp, isMobile }) => {
       dosDescription: "Wifi • Kitchen • Living Area",
     },
   };
-
-  function isRentals() {
-    return window.location.pathname === '/rentals';
-  }
-
-  function isProperties() {
-    return window.location.pathname === '/account';
-  }
-
-  function isClaims() {
-    return window.location.pathname === '/claims';
-  }
 
   if (selected) {
     refProp?.current?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -117,69 +106,23 @@ const PlaceDetails = ({ selected, place, refProp, isMobile }) => {
         <img
           style={styles.rentalImg}
           src={
-            place.photo
-              ? place.photo.images.large.url
+            trip.place.photo
+              ? trip.place.photo.images.large.url
               : "https://imgs.search.brave.com/eoIZlg2L0ttNGXCr45Nq_l3TtsSqY7MQ3YlS5n6jIqs/rs:fit:789:883:1/g:ce/aHR0cHM6Ly9sZWlm/ZXJwcm9wZXJ0aWVz/LmNvbS93cC1jb250/ZW50L3VwbG9hZHMv/Tk8tSU1BR0UtQVZB/SUxBQkxFLmpwZw"
           }
           alt="place"
         />
         <Box sx={styles.rentalInfo}>
-          <Box sx={styles.rentalTitle}>{place.name}</Box>
+          <Box sx={styles.rentalTitle}>{trip.place.name}</Box>
           <Box sx={styles.rentalDesc}>
-            {rentalsList.attributes.unoDescription}
+            From <b>{trip.checkIn}</b> to <b>{trip.checkOut}</b>
           </Box>
-          <Box sx={styles.rentalDesc}>
-            {rentalsList.attributes.dosDescription}
-          </Box>
-          <Box
-            style={{
-              marginTop: "1.5rem",
-              display: "flex",
-              alignItems: "center",
-              ...(isMobile && {
-                justifyContent: "space-between",
-              }),
-            }}
-          >
-            <StyledRating
-              name="read-only"
-              size="small"
-              value={Number(place.rating)}
-              readOnly
-              precision={0.5}
-            />
-            <Box>
-              <span
-                style={{
-                  marginLeft: "5px",
-                  fontWeight: "bold",
-                  ...(isMobile && {
-                    fontSize: "14px",
-                  }),
-                }}
-              >
-                {Number(place.rating)}
-              </span>
-              <span
-                style={{
-                  color: "gray",
-                  marginLeft: "5px",
-                  ...(isMobile && {
-                    fontSize: "14px",
-                  }),
-                }}
-              >
-                ({place.num_reviews} reviews)
-              </span>
-            </Box>
-          </Box>
+          <Box sx={styles.rentalDesc}>{trip.place.location_string}</Box>
           <Box sx={styles.bottomButton}>
             <Link
-              to={isClaims() && "/claim" ||
-                  isRentals() && "/details" ||
-                  isProperties() && "/property"}
+              to="/trip"
               style={{ textDecoration: "none" }}
-              state={place}
+              state={trip}
             >
               <Button
                 size="small"
@@ -192,15 +135,9 @@ const PlaceDetails = ({ selected, place, refProp, isMobile }) => {
                   },
                 }}
               >
-                {isProperties() && "Manage" ||
-                  "Details"}
+                "Details"
               </Button>
             </Link>
-            {isProperties() ||
-            <Box sx={styles.price}>
-              {/* <Icon fill="#808080" size={10} svg="matic" /> */}
-              {place.rating ? Number(place.rating) / 50 : 0.07} / Day
-            </Box>}
           </Box>
         </Box>
       </Box>
@@ -208,4 +145,4 @@ const PlaceDetails = ({ selected, place, refProp, isMobile }) => {
   );
 };
 
-export default PlaceDetails;
+export default TripDetails;

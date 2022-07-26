@@ -173,7 +173,7 @@ const Home = ({ account, provider, onLoad, onPlaceChanged }) => {
           {account && (
             <IconButton
               sx={{ color: "#fff" }}
-              onClick={() => navigate("/trip")}
+              onClick={() => navigate("/account")}
             >
               <PersonIcon />
             </IconButton>

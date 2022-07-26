@@ -2,11 +2,11 @@ import React, { useContext, useEffect, useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Rentals from "./pages/Rentals";
+import Account from "./pages/Account";
 
 import { getData } from "./api";
 import Details from "./pages/Details";
 import { searchFilterContext } from "./Context";
-import Trip from "./pages/Trip";
 
 import { ethers } from 'ethers'
 import Web3Modal from "web3modal" 
@@ -125,7 +125,7 @@ const App = () => {
         const checkIn = Number(ethers.utils.formatUnits(startTime, 0));
         const checkOut = Number(ethers.utils.formatUnits(stopTime, 0));
 
-        tokens.push({...meta.data, token: tokenId, checkIn: new Date(checkIn).toDateString(), checkOut: new Date(checkOut).toDateString()});  
+        tokens.push({place: meta.data, token: tokenId, checkIn: new Date(checkIn).toDateString(), checkOut: new Date(checkOut).toDateString()});  
       }
 
       setTrips(tokens);
@@ -188,7 +188,12 @@ const App = () => {
   useEffect(() => {
     setIsLoading(true);
     getData(bound, "hotels").then((data) => {
-      setPlaces(data?.filter((place) => place.name));
+      setPlaces(data?.filter((place) => {
+        return place.name &&
+          checkBound(place.latitude, 
+            place.longitude,
+            bound)
+      }));
       setIsLoading(false);
     });
   }, [bound]);
@@ -261,33 +266,15 @@ const App = () => {
         } 
       />
       <Route 
-        path="/trip" 
+        path="/account" 
         element={
-          <Trip 
+          <Account 
             account={account}
             provider={provider}
             trips={trips}
+            properties={properties}
           />
         } 
-      />
-      <Route
-        path="/properties"
-        element={
-          <Rentals
-            account={account}
-            provider={provider}
-            isLoading={isLoading}
-            autocomplete={autocomplete}
-            setAutocomplete={setAutocomplete}
-            onPlaceChanged={onPlaceChanged}
-            places={properties}
-            coordinates={coordinates}
-            setCoordinates={setCoordinates}
-            setBound={setBound}
-            childClicked={childClicked}
-            setChildClicked={setChildClicked}
-          />
-        }
       />
       <Route
         path="/claims"
@@ -305,6 +292,7 @@ const App = () => {
             setBound={setBound}
             childClicked={childClicked}
             setChildClicked={setChildClicked}
+            onLoad={onLoad}
           />
         }
       />

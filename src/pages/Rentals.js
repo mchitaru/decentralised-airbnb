@@ -8,10 +8,12 @@ import ReactLoading from "react-loading";
 import Map from "../components/Map";
 import PlaceDetails from "../components/PlaceDetails";
 import { searchFilterContext } from "../Context";
+import { Autocomplete } from "@react-google-maps/api";
 import {
   Box,
   Divider,
   IconButton,
+  TextField,
   Typography,
   useMediaQuery,
 } from "@mui/material";
@@ -29,6 +31,8 @@ const Rentals = ({
   childClicked,
   setChildClicked,
   autocomplete,
+  onLoad, 
+  onPlaceChanged 
 }) => {
   const months = [
     "Jan",
@@ -70,15 +74,12 @@ const Rentals = ({
     return window.location.pathname === '/rentals';
   }
 
-  function isProperties() {
-    return window.location.pathname === '/properties';
-  }
-
   function isClaims() {
     return window.location.pathname === '/claims';
   }
 
-  if (autocomplete) {
+  if (autocomplete && autocomplete.getPlace()) {
+    
     localStorage.setItem(
       "lat",
       JSON.stringify(autocomplete.getPlace().geometry.location.lat())
@@ -225,48 +226,12 @@ const Rentals = ({
             {guests} Guest
           </Typography>
         </Box>}
-        {isProperties() && <Box sx={styles.searchReminder}>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              backgroundColor: "#EB4E5F",
-              padding: "0px",
-              borderRadius: "60%",
-              marginRight: "5px",
-              ...(isMobile && {
-                width: "60vw",
-                borderRadius: "0.5rem",
-                justifyContent: "center",
-
-                cursor: "pointer",
-              }),
-            }}
-            onClick={() => navigate("/claims")}
-          >
-            <IconButton onClick={() => navigate("/claims")}>
-              <AddIcon
-                sx={{
-                  color: "white",
-                  ...(isMobile && {
-                    mr: 2,
-                  }),
-                }}
-              />
-              {isMobile && (
-                <Typography variant="body1" color="white">
-                  Search
-                </Typography>
-              )}
-            </IconButton>
-          </Box>
-        </Box>}
         <Box display="flex">
           {/* <ConnectButton /> */}
           {account && (
             <IconButton
               sx={{ color: "#EB4E5F" }}
-              onClick={() => navigate("/trip")}
+              onClick={() => navigate("/account")}
             >
               <PersonIcon />
             </IconButton>
@@ -289,9 +254,23 @@ const Rentals = ({
             <Box>
               <Typography varient="body2" fontSize={15}>
                 {isRentals() && "Stays Available For Your Destination" ||
-                isProperties() && "Properties Available To Manage" ||
-                isClaims() && "Properties Available To Claim"}
+                isClaims() && ("Properties Available To Claim")}
               </Typography>
+              {isClaims() &&
+              <Autocomplete onLoad={onLoad} onPlaceChanged={onPlaceChanged}>
+                <TextField
+                  variant="standard"
+                  autoFocus
+                  sx={{
+                    "&::placeholder": {
+                      color: "gray",
+                    },
+                  }}
+                  placeholder="Where are you going?"
+                  fullWidth
+                  InputProps={{ disableUnderline: true }}
+                />
+              </Autocomplete>}
             </Box>
             {isLoading ? (
               <Box

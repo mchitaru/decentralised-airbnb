@@ -221,7 +221,7 @@ const Details = ({account, provider}) => {
       
       setLoading(false);
 
-      navigate("/trip");
+      navigate("/account");
     }
   };
 
@@ -250,7 +250,7 @@ const Details = ({account, provider}) => {
           {account && (
             <IconButton
               sx={{ color: "#EB4E5F" }}
-              onClick={() => navigate("/trip")}
+              onClick={() => navigate("/account")}
             >
               <PersonIcon />
             </IconButton>
