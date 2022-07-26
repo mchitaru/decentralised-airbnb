@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { Rating, Button, Box, useMediaQuery } from "@mui/material";
 import styled from "styled-components";
 
-const PlaceDetails = ({ selected, place, refProp, isMobile, isWraps }) => {
+const PlaceDetails = ({ selected, place, refProp, isMobile }) => {
   const isSmall = useMediaQuery("(max-width:420px)");
   const rentalsList = {
     attributes: {
@@ -12,6 +12,18 @@ const PlaceDetails = ({ selected, place, refProp, isMobile, isWraps }) => {
       dosDescription: "Wifi • Kitchen • Living Area",
     },
   };
+
+  function isRentals() {
+    return window.location.pathname === '/rentals';
+  }
+
+  function isProperties() {
+    return window.location.pathname === '/properties';
+  }
+
+  function isClaims() {
+    return window.location.pathname === '/claims';
+  }
 
   if (selected) {
     refProp?.current?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -163,7 +175,9 @@ const PlaceDetails = ({ selected, place, refProp, isMobile, isWraps }) => {
           </Box>
           <Box sx={styles.bottomButton}>
             <Link
-              to={isWraps?"/wrap":"/details"}
+              to={isClaims() && "/claim" ||
+                  isRentals() && "/details" ||
+                  isProperties() && "/property"}
               style={{ textDecoration: "none" }}
               state={place}
             >
@@ -178,7 +192,8 @@ const PlaceDetails = ({ selected, place, refProp, isMobile, isWraps }) => {
                   },
                 }}
               >
-                {isWraps?"Wrap":"Details"}
+                {isProperties() && "Manage" ||
+                  "Details"}
               </Button>
             </Link>
             <Box sx={styles.price}>

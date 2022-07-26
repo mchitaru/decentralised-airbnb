@@ -1,5 +1,7 @@
 import { LocalParkingOutlined, MeetingRoomOutlined } from "@mui/icons-material";
-import LoadingButton from "@mui/lab/LoadingButton";
+import RentDetails from "../components/RentDetails";
+import ClaimDetails from "../components/ClaimDetails";
+import Calendar from "../components/Calendar"
 import {
   InputBase,
   Rating,
@@ -33,7 +35,7 @@ import {
   calendarAddress
 } from '../artifacts/config' 
 
-import Calendar from '../artifacts/contracts/Calendar.sol/Calendar.json'
+import CalendarABI from '../artifacts/contracts/Calendar.sol/Calendar.json'
 
 const Details = ({account, provider}) => {
   const rentalsList = {
@@ -42,6 +44,19 @@ const Details = ({account, provider}) => {
       dosDescription: "Wifi • Kitchen • Living Area",
     },
   };
+
+  function isRent() {
+    return window.location.pathname === '/details';
+  }
+
+  function isClaim() {
+    return window.location.pathname === '/claim';
+  }
+
+  function isProperty() {
+    return window.location.pathname === '/property';
+  }
+
   let isMobile = useMediaQuery("(max-width:850px)");
   const { checkIn, setCheckIn, checkOut, setCheckOut, guests, setGuests } =
     useContext(searchFilterContext);
@@ -55,42 +70,8 @@ const Details = ({account, provider}) => {
   const navigate = useNavigate();
   const { state: place } = useLocation();
 
-  const [available, setAvailable] = useState(true);
-  const [noOfDays, setNoOfDays] = useState();
   // const contractProcessor = useWeb3ExecuteFunction();
 
-  //****************************  code for no of days ***********************************
-  useEffect(async () => {
-    var today = new Date(
-      checkIn.split("-")[0],
-      checkIn.split("-")[1] - 1,
-      checkIn.split("-")[2]
-    );
-
-    var date2 = new Date(
-      checkOut.split("-")[0],
-      checkOut.split("-")[1] - 1,
-      checkOut.split("-")[2]
-    );
-
-    var timeDiff = Math.abs(date2.getTime() - today.getTime());
-    var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
-
-    setNoOfDays(diffDays);
-
-    try{
-
-      const contract = new ethers.Contract(calendarAddress, Calendar.abi, provider.getSigner());                
-      const available = await contract.isAvailable(place.token, (new Date(checkIn)).getTime(), (new Date(checkOut)).getTime());  
-      
-      setAvailable(available);  
-
-    }catch(e){
-      setAvailable(false);
-      console.log("Copntract call error!");
-    }
-
-  }, [checkIn, checkOut]);
 
   //***********************************   Styles *****************************************
 
@@ -148,14 +129,6 @@ const Details = ({account, provider}) => {
     },
   };
 
-  function isBook() {
-    return window.location.pathname === '/details';
-  }
-
-  function isWrap() {
-    return window.location.pathname === '/wrap';
-  }
-
   // ****************** Connecting with Blockchain and functions **************************
 
   async function uploadToIPFS(place) {
@@ -174,7 +147,7 @@ const Details = ({account, provider}) => {
     return '';
   }
 
-  const listProperty = async (place) => {
+  const claimProperty = async (place) => {
 
     if(account != null){
 
@@ -186,7 +159,7 @@ const Details = ({account, provider}) => {
 
       try{
 
-        const contract = new ethers.Contract(calendarAddress, Calendar.abi, provider.getSigner());
+        const contract = new ethers.Contract(calendarAddress, CalendarABI.abi, provider.getSigner());
         const transaction = await contract.mint(url);
         await transaction.wait();  
   
@@ -237,7 +210,7 @@ const Details = ({account, provider}) => {
 
       try{
 
-        const contract = new ethers.Contract(calendarAddress, Calendar.abi, provider.getSigner());
+        const contract = new ethers.Contract(calendarAddress, CalendarABI.abi, provider.getSigner());
 
         const transaction = await contract.reserve(place.token, (new Date(checkIn)).getTime(), (new Date(checkOut)).getTime());
         await transaction.wait();  
@@ -291,7 +264,7 @@ const Details = ({account, provider}) => {
         // style={{ margin: "0 15vw 0 15vw", marginTop: "2vh" }}
       >
         <Typography variant={isMobile ? "h5" : "h4"}>
-          {place.autobroaden_label}
+          {isRent()?place.autobroaden_label:place.name}
         </Typography>
         <Box
           style={{
@@ -401,215 +374,30 @@ const Details = ({account, provider}) => {
               WiFi.
             </Typography>
           </Box>
-          {isMobile ? (
-            <Paper
-              sx={{
-                display: "flex",
-                position: "fixed",
-                justifyContent: "space-between",
-                alignItems: "center",
-                bottom: 0,
-                width: "100%",
-                p: 3,
-                ml: -3,
-              }}
-            >
-              <Box style={{ display: "flex" }}>
-                {/* <Icon fill="#808080" size={16} svg="matic" /> &nbsp; */}
-                {(
-                  (place.rating ? Number(place.rating) / 50 : 0.07) * noOfDays
-                ).toFixed(2)}
-              </Box>
-              <LoadingButton
-                loading={loading}
-                disabled = {isBook() && !available}
-                onClick={() => {
-                  isBook()?
-                    bookRental(place, checkIn, checkOut):
-                    listProperty(place);
-                  // if (account)
-                  //   bookRental(
-                  //     place.name,
-                  //     place.location_string,
-                  //     checkIn,
-                  //     checkOut,
-                  //     place.photo.images.original.url
-                  //   );
-                  // else handleAccount();
-                }}
-                variant="text"
-                sx={{
-                  color: "#fff",
-                  bgcolor: "#d44957",
-                  borderRadius: "0.2rem",
-                  mr: 4,
-                  ":hover": {
-                    backgroundColor: "#b4414c",
-                  },
-                }}
-              >
-                Book Now
-              </LoadingButton>
-            </Paper>
-          ) : (
-            <Box sx={styles.card}>
-              <Box sx={styles.card_top}>
-                <Box display="flex">
-                  {/* <Icon fill="#808080" size={20} svg="matic" /> */}
-                  <Box sx={styles.price_div}>
-                    {place.rating ? Number(place.rating) / 50 : 0.07} / Day
-                  </Box>
-                </Box>
-                <Box sx={styles.card_rating}>
-                  <StyledRating
-                    name="read-only"
-                    value={place.rating / 5}
-                    precision={0.1}
-                    readOnly
-                    max={1}
-                  />
-                  <span
-                    style={{
-                      marginLeft: "5px",
-                      fontSize: "1rem",
-                    }}
-                  >
-                    {place.rating}
-                  </span>
-                  <span
-                    style={{
-                      color: "gray",
-                      marginLeft: "5px",
-                      fontSize: "0.8rem",
-                    }}
-                  >
-                    ({place.num_reviews} reviews)
-                  </span>
-                </Box>
-              </Box>
-              <Divider sx={{ mt: 2 }} />
-              <Box sx={styles.description}>
-                <Box style={{ display: "flex", flexDirection: "column" }}>
-                  <Box sx={styles.input}>
-                    Check-in
-                    <TextField
-                      variant="standard"
-                      type="date"
-                      fullWidth
-                      InputProps={{ disableUnderline: true }}
-                      onChange={(e) => {
-                        setCheckIn(e.target.value);
-                      }}
-                      value={checkIn}
-                    />
-                  </Box>
-                  <Box sx={styles.input}>
-                    Check Out
-                    <TextField
-                      variant="standard"
-                      type="date"
-                      fullWidth
-                      InputProps={{ disableUnderline: true }}
-                      onChange={(e) => {
-                        setCheckOut(e.target.value);
-                      }}
-                      value={checkOut}
-                    />
-                  </Box>
-                </Box>
-                <Box sx={styles.input}>
-                  Guests
-                  <InputBase
-                    value={guests}
-                    onChange={(e) => setGuests(e.target.value)}
-                    type="number"
-                    fullWidth
-                    inputProps={{ min: 1 }}
-                    sx={{ padding: "5px" }}
-                  />
-                </Box>
-              </Box>
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                }}
-              >
-                <Box
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    marginBottom: "2.75rem",
-                    marginTop: "1.75rem",
-                  }}
-                >
-                  <Box style={{ display: "flex" }}>
-                    {/* <Icon fill="#808080" size={16} svg="matic" /> &nbsp; */}
-                    {place.rating ? Number(place.rating) / 50 : 0.07} x{" "}
-                    {noOfDays}
-                    &nbsp; Days
-                  </Box>
-                  <Box style={{ display: "flex" }}>
-                    {/* <Icon fill="#808080" size={16} svg="matic" /> &nbsp; */}
-                    {(
-                      (place.rating ? Number(place.rating) / 50 : 0.07) *
-                      noOfDays
-                    ).toFixed(2)}
-                  </Box>
-                </Box>
-                <Divider sx={{ mb: "1.75rem" }} />
-                <Box
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    marginBottom: "1.75rem",
-                  }}
-                >
-                  <Typography variant="h6" color="initial">
-                    Total :
-                  </Typography>
-                  <Box style={{ display: "flex", alignItems: "center" }}>
-                    {/* <Icon fill="#808080" size={16} svg="matic" /> &nbsp; */}
-                    {(
-                      (place.rating ? Number(place.rating) / 50 : 0.07) *
-                      noOfDays
-                    ).toFixed(2)}
-                  </Box>
-                </Box>
-                <LoadingButton
-                  fullWidth
-                  loading={loading}
-                  disabled = {isBook() && !available}
-                  onClick={() => {
-                    isBook()?
-                    bookRental(place, checkIn, checkOut):
-                    listProperty(place);
-                  //   if (account)
-                  //     bookRental(
-                  //       place.name,
-                  //       place.location_string,
-                  //       checkIn,
-                  //       checkOut,
-                  //       place.photo.images.original.url
-                  //     );
-                  //   else handleAccount();
-                  // 
-                  }}
-                  variant="text"
-                  sx={{
-                    color: "#fff",
-                    bgcolor: "#d44957",
-                    borderRadius: "0.5rem",
-                    ":hover": {
-                      backgroundColor: "#b4414c",
-                    },
-                  }}
-                >
-                  {isWrap()?"Wrap":"Book Now"}
-                </LoadingButton>
-              </Box>
-            </Box>
-          )}
+        {isRent() &&
+        <RentDetails 
+          account={account}
+          provider={provider}
+          place={place}
+          bookRental={bookRental}
+          loading={loading}
+          setLoading={setLoading}
+        /> ||
+        isClaim() &&
+        <ClaimDetails 
+          account={account}
+          provider={provider}
+          place={place}
+          claimProperty={claimProperty}
+          loading={loading}
+          setLoading={setLoading}
+        />||
+        isProperty() &&
+        <Calendar 
+          account={account}
+          provider={provider}
+          place={place}
+        />}
         </Box>
       </Container>
     </Box>

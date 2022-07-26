@@ -74,8 +74,8 @@ const Rentals = ({
     return window.location.pathname === '/properties';
   }
 
-  function isWraps() {
-    return window.location.pathname === '/wraps';
+  function isClaims() {
+    return window.location.pathname === '/claims';
   }
 
   if (autocomplete) {
@@ -242,9 +242,9 @@ const Rentals = ({
                 cursor: "pointer",
               }),
             }}
-            onClick={() => navigate("/wraps")}
+            onClick={() => navigate("/claims")}
           >
-            <IconButton onClick={() => navigate("/wraps")}>
+            <IconButton onClick={() => navigate("/claims")}>
               <AddIcon
                 sx={{
                   color: "white",
@@ -288,7 +288,9 @@ const Rentals = ({
           <Box varient="body1" sx={styles.rentalsContentL}>
             <Box>
               <Typography varient="body2" fontSize={15}>
-                Stays Available For Your Destination
+                {isRentals() && "Stays Available For Your Destination" ||
+                isProperties() && "Properties Available To Manage" ||
+                isClaims() && "Properties Available To Claim"}
               </Typography>
             </Box>
             {isLoading ? (
@@ -315,8 +317,7 @@ const Rentals = ({
                     <PlaceDetails
                       place={place}
                       selected={Number(childClicked) === i}
-                      refProp={elRefs[i]}
-                      isWraps={isWraps()}
+                      refProp={elRefs[i]}                      
                     />
                   </Box>
                 </Box>

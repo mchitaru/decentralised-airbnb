@@ -58,7 +58,7 @@ const App = () => {
 
       const contract = new ethers.Contract(calendarAddress, Calendar.abi, provider);
 
-      const balance = await contract.totalSupply();
+      const balance = ethers.utils.formatUnits(await contract.totalSupply(), 0);
   
       let tokens = [];
   
@@ -87,7 +87,7 @@ const App = () => {
     if(account){
 
       const contract = new ethers.Contract(calendarAddress, Calendar.abi, provider.getSigner());
-      const balance = ethers.utils.formatUnits(await contract.balanceOf(account));
+      const balance = ethers.utils.formatUnits(await contract.balanceOf(account), 0);
 
       let tokens = [];
 
@@ -243,7 +243,16 @@ const App = () => {
         } 
       />
       <Route 
-        path="/wrap" 
+        path="/claim" 
+        element={
+          <Details 
+            account={account}
+            provider={provider}
+          />
+        } 
+      />
+      <Route 
+        path="/property" 
         element={
           <Details 
             account={account}
@@ -281,7 +290,7 @@ const App = () => {
         }
       />
       <Route
-        path="/wraps"
+        path="/claims"
         element={
           <Rentals
             account={account}
