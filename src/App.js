@@ -126,7 +126,11 @@ const App = () => {
           tokens.push({...meta.data, token: tokenId});
         }
   
-        setProperties(tokens);
+        if(tokens.length)
+          setProperties(tokens);
+        else
+          setProperties(null);
+
         setIsLoading(false);
 
         console.log('loading properties...');
@@ -158,12 +162,14 @@ const App = () => {
           tokens.push({place: meta.data, token: tokenId, checkIn: new Date(checkIn).toDateString(), checkOut: new Date(checkOut).toDateString()});  
         }
   
-        setTrips(tokens);
+        if(tokens.length)
+          setTrips(tokens);
+        else
+          setTrips(null);
 
         setIsLoading(false);
 
         console.log('loading trips...');
-
       }
     };  
   

@@ -2,6 +2,7 @@ import { LocalParkingOutlined, MeetingRoomOutlined } from "@mui/icons-material";
 import RentDetails from "../components/RentDetails";
 import ClaimDetails from "../components/ClaimDetails";
 import Calendar from "../components/Calendar"
+import placeholder from "../images/placeholder.png";
 import { ethers } from "ethers";
 import {
   Rating,
@@ -308,7 +309,7 @@ const Details = ({account, provider}) => {
             src={
               place.photo
                 ? place.photo.images.original.url
-                : "https://imgs.search.brave.com/eoIZlg2L0ttNGXCr45Nq_l3TtsSqY7MQ3YlS5n6jIqs/rs:fit:789:883:1/g:ce/aHR0cHM6Ly9sZWlm/ZXJwcm9wZXJ0aWVz/LmNvbS93cC1jb250/ZW50L3VwbG9hZHMv/Tk8tSU1BR0UtQVZB/SUxBQkxFLmpwZw"
+                : placeholder
             }
             alt="place"
           />

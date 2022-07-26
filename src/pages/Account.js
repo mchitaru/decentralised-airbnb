@@ -40,15 +40,15 @@ function TabPanel(props) {
 }
 
 TabPanel.propTypes = {
-  children: PropTypes.node,
+  children: PropTypes.node.isRequired,
   index: PropTypes.number.isRequired,
   value: PropTypes.number.isRequired,
 };
 
 function a11yProps(index) {
   return {
-    id: `simple-tab-${index}`,
-    'aria-controls': `simple-tabpanel-${index}`,
+    id: `tab-${index}`,
+    'aria-controls': `tabpanel-${index}`,
   };
 }
 
@@ -70,11 +70,15 @@ export default function Account({account, provider, trips, properties, isLoading
     },
   };
 
+  const activeTab = localStorage.getItem("account-tabs");
+
   const navigate = useNavigate();
-  const [value, setValue] = React.useState(0);
+  const [value, setValue] = React.useState(activeTab?Number(activeTab):0);
 
   const handleChange = (event, newValue) => {
+
     setValue(newValue);
+    localStorage.setItem("account-tabs", newValue);
   };
 
   return (
@@ -117,7 +121,7 @@ export default function Account({account, provider, trips, properties, isLoading
               height={200}
               width={100}
             />
-          ) : trips.length ? (
+          ) : trips ? (
             <Box sx={{ mt: "2rem" }}>
                 {trips?.map((trip, i) => (
                   <Box key={i}>
@@ -125,6 +129,7 @@ export default function Account({account, provider, trips, properties, isLoading
                     <Box>
                       <TripDetails
                         trip={trip}
+                        isMobile={isMobile}
                       />
                     </Box>              
                   </Box>              
@@ -156,7 +161,7 @@ export default function Account({account, provider, trips, properties, isLoading
         </Container>        
       </TabPanel>
       <TabPanel value={value} index={1}>
-      <Container sx={{minWidth:"xl"}}>
+        <Container sx={{minWidth:"xl"}}>
           {isLoading ? (
             <ReactLoading
               type="bubbles"
@@ -164,17 +169,19 @@ export default function Account({account, provider, trips, properties, isLoading
               height={200}
               width={100}
             />
-          ) : properties.length ? (
+          ) : properties ? (
             <Box sx={{ mt: "2rem" }}>
                 {properties?.map((place, i) => (              
                   <Box key={i}>
                     <Divider sx={{ margin: "30px 0px" }} />
-                      <Box>
-                          <PlaceDetails
-                            place={place}
-                          />
-                      </Box>
+                    <Box>
+                        <PlaceDetails
+                          selected={false}
+                          place={place}
+                          isMobile={isMobile}
+                        />
                     </Box>
+                  </Box>
                 ))}
             </Box>
           ) : (

@@ -1,28 +1,11 @@
 import React from "react";
 // import { Icon } from "web3uikit";
 import { Link } from "react-router-dom";
-import { Rating, Button, Box, useMediaQuery } from "@mui/material";
-import styled from "styled-components";
-import { Divider } from "antd";
+import { Button, Box, useMediaQuery } from "@mui/material";
+import placeholder from "../images/placeholder.png";
 
-const TripDetails = ({ selected, trip, refProp, isMobile }) => {
+const TripDetails = ({ trip, isMobile }) => {
   const isSmall = useMediaQuery("(max-width:420px)");
-  const rentalsList = {
-    attributes: {
-      unoDescription: "2 Guests • 2 Beds • 1 Rooms",
-      dosDescription: "Wifi • Kitchen • Living Area",
-    },
-  };
-
-  if (selected) {
-    refProp?.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-  }
-
-  const StyledRating = styled(Rating)({
-    "& .MuiRating-iconFilled": {
-      color: "#EB4E5F",
-    },
-  });
 
   const styles = {
     rentalDivH: {
@@ -101,14 +84,14 @@ const TripDetails = ({ selected, trip, refProp, isMobile }) => {
   };
 
   return (
-    <Box sx={selected && styles.rentalDivH}>
+    <Box>
       <Box sx={styles.rentalDiv}>
         <img
           style={styles.rentalImg}
           src={
             trip.place.photo
               ? trip.place.photo.images.large.url
-              : "https://imgs.search.brave.com/eoIZlg2L0ttNGXCr45Nq_l3TtsSqY7MQ3YlS5n6jIqs/rs:fit:789:883:1/g:ce/aHR0cHM6Ly9sZWlm/ZXJwcm9wZXJ0aWVz/LmNvbS93cC1jb250/ZW50L3VwbG9hZHMv/Tk8tSU1BR0UtQVZB/SUxBQkxFLmpwZw"
+              : placeholder
           }
           alt="place"
         />

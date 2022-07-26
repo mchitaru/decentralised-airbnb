@@ -1,8 +1,8 @@
 import React from "react";
-// import { Icon } from "web3uikit";
 import { Link } from "react-router-dom";
 import { Rating, Button, Box, useMediaQuery } from "@mui/material";
 import styled from "styled-components";
+import placeholder from "../images/placeholder.png";
 
 const PlaceDetails = ({ selected, place, refProp, isMobile }) => {
   const isSmall = useMediaQuery("(max-width:420px)");
@@ -119,7 +119,7 @@ const PlaceDetails = ({ selected, place, refProp, isMobile }) => {
           src={
             place.photo
               ? place.photo.images.large.url
-              : "https://imgs.search.brave.com/eoIZlg2L0ttNGXCr45Nq_l3TtsSqY7MQ3YlS5n6jIqs/rs:fit:789:883:1/g:ce/aHR0cHM6Ly9sZWlm/ZXJwcm9wZXJ0aWVz/LmNvbS93cC1jb250/ZW50L3VwbG9hZHMv/Tk8tSU1BR0UtQVZB/SUxBQkxFLmpwZw"
+              : placeholder
           }
           alt="place"
         />
@@ -175,9 +175,9 @@ const PlaceDetails = ({ selected, place, refProp, isMobile }) => {
           </Box>
           <Box sx={styles.bottomButton}>
             <Link
-              to={isClaims() && "/claim" ||
-                  isRentals() && "/details" ||
-                  isProperties() && "/property"}
+              to={(isClaims() && "/claim") ||
+                  (isRentals() && "/details") ||
+                  (isProperties() && "/property")}
               style={{ textDecoration: "none" }}
               state={place}
             >
@@ -192,11 +192,11 @@ const PlaceDetails = ({ selected, place, refProp, isMobile }) => {
                   },
                 }}
               >
-                {isProperties() && "Manage" ||
+                {(isProperties() && "Manage") ||
                   "Details"}
               </Button>
             </Link>
-            {isProperties() ||
+            {!isProperties() &&
             <Box sx={styles.price}>
               {/* <Icon fill="#808080" size={10} svg="matic" /> */}
               {place.rating ? Number(place.rating) / 50 : 0.07} / Day
