@@ -252,10 +252,6 @@ const Rentals = ({
         ) : (
           <Box varient="body1" sx={styles.rentalsContentL}>
             <Box>
-              <Typography varient="body2" fontSize={15}>
-                {isRentals() && "Stays Available For Your Destination" ||
-                isClaims() && ("Properties Available To Claim")}
-              </Typography>
               {isClaims() &&
               <Autocomplete onLoad={onLoad} onPlaceChanged={onPlaceChanged}>
                 <TextField
@@ -266,11 +262,15 @@ const Rentals = ({
                       color: "gray",
                     },
                   }}
-                  placeholder="Where are you going?"
+                  placeholder="What are you looking for?"
                   fullWidth
                   InputProps={{ disableUnderline: true }}
                 />
               </Autocomplete>}
+              <Typography varient="body2" fontSize={15}>
+                {isRentals() && "Stays Available For Your Destination" ||
+                isClaims() && ("Properties Available To Claim")}
+              </Typography>
             </Box>
             {isLoading ? (
               <Box

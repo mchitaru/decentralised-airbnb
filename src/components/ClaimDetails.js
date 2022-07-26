@@ -118,34 +118,6 @@ const ClaimDetails = ({account, provider, place, claimProperty, loading, setLoad
   </Paper>
   ) : (
   <Box sx={styles.card}>
-      <Box sx={styles.card_top}>
-      <Box sx={styles.card_rating}>
-          <StyledRating
-          name="read-only"
-          value={place.rating / 5}
-          precision={0.1}
-          readOnly
-          max={1}
-          />
-          <span
-          style={{
-              marginLeft: "5px",
-              fontSize: "1rem",
-          }}
-          >
-          {place.rating}
-          </span>
-          <span
-          style={{
-              color: "gray",
-              marginLeft: "5px",
-              fontSize: "0.8rem",
-          }}
-          >
-          ({place.num_reviews} reviews)
-          </span>
-      </Box>
-      </Box>
       <Divider sx={{ mt: 2 }} />
       <Box
       sx={{

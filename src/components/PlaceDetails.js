@@ -112,7 +112,7 @@ const PlaceDetails = ({ selected, place, refProp, isMobile }) => {
   };
 
   return (
-    <Box sx={selected && styles.rentalDivH}>
+    <Box sx={{...(selected && styles.rentalDivH)}}>
       <Box sx={styles.rentalDiv}>
         <img
           style={styles.rentalImg}

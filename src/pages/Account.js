@@ -33,7 +33,7 @@ function TabPanel(props) {
     >
       {value === index && (
         <Box sx={{ p: 3 }}>
-          <Typography>{children}</Typography>
+          <Typography component={'span'}>{children}</Typography>
         </Box>
       )}
     </div>
@@ -81,9 +81,9 @@ export default function Account({account, provider, trips, properties}) {
 
   return (
     <Box sx={{ width: '100%' }}>
-      <Container
-        minWidth="xl"
+      <Container        
         sx={{
+          minWidth: "xl",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
@@ -111,7 +111,7 @@ export default function Account({account, provider, trips, properties}) {
         </Tabs>
       </Box>
       <TabPanel value={value} index={0}>        
-        <Container minWidth="xl">
+        <Container sx={{minWidth:"xl"}}>
           {isLoading ? (
             <ReactLoading
               type="bubbles"
@@ -158,7 +158,7 @@ export default function Account({account, provider, trips, properties}) {
         </Container>        
       </TabPanel>
       <TabPanel value={value} index={1}>
-      <Container minWidth="xl">
+      <Container sx={{minWidth:"xl"}}>
           {isLoading ? (
             <ReactLoading
               type="bubbles"
@@ -182,10 +182,10 @@ export default function Account({account, provider, trips, properties}) {
           ) : (
             <Box sx={{ mt: "2rem", mb: "2rem" }}>
               <Typography variant="h5" color="initial" gutterBottom>
-                No properties added ... yet!
+                No properties claimed ... yet!
               </Typography>
               <Typography variant="subtitle1" color="gray" gutterBottom>
-                Time to start earning and add your first property
+                Time to claim your first property and start earning
               </Typography>
               <Button
                 onClick={() => navigate("/claims")}
@@ -198,7 +198,7 @@ export default function Account({account, provider, trips, properties}) {
                   },
                 }}
               >
-                Claim one
+                Claim property
               </Button>
             </Box>
           )}

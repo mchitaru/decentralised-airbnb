@@ -112,16 +112,19 @@ const RentDetails = ({account, provider, place, bookRental, loading, setLoading}
 
     setNoOfDays(diffDays);
 
-    try{
+    if(provider){
 
-      const contract = new ethers.Contract(calendarAddress, Calendar.abi, provider.getSigner());                
-      const available = await contract.isAvailable(place.token, (new Date(checkIn)).getTime(), (new Date(checkOut)).getTime());  
-      
-      setAvailable(available);  
+      try{
 
-    }catch(e){
-      setAvailable(false);
-      console.log("Copntract call error!");
+        const contract = new ethers.Contract(calendarAddress, Calendar.abi, provider.getSigner());                
+        const available = await contract.isAvailable(place.token, (new Date(checkIn)).getTime(), (new Date(checkOut)).getTime());  
+        
+        setAvailable(available);  
+  
+      }catch(e){
+        setAvailable(false);
+        console.log("Copntract call error!");
+      }  
     }
 
   }, [checkIn, checkOut]);

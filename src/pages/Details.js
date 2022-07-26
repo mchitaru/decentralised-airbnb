@@ -221,15 +221,15 @@ const Details = ({account, provider}) => {
       
       setLoading(false);
 
-      navigate("/account");
+      // navigate("/account");
     }
   };
 
   return (
     <Box>
       <Container
-        minWidth="xl"
         sx={{
+          minWidth: "xl",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
