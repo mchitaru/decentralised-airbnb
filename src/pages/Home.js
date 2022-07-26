@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import bg from "../images/homeBg.jpg";
 import mobileLogo from "../images/mobileWhiteLogo.png";
@@ -17,8 +17,6 @@ import {
 import { searchFilterContext } from "../Context";
 import PersonIcon from "@mui/icons-material/Person";
 // import { useMoralis } from "react-moralis";
-import { ethers } from 'ethers'
-import Web3Modal from "web3modal" 
 
 const Home = ({ account, provider, onLoad, onPlaceChanged }) => {
   let isMedium = useMediaQuery("(max-width:900px)");

@@ -8,10 +8,8 @@ import {
   Typography,
   Box,
   Divider,
-  Container,
   useMediaQuery,
   Paper,
-  IconButton,
 } from "@mui/material";
 import { searchFilterContext } from "../Context";
 import { ethers } from 'ethers'
@@ -94,40 +92,44 @@ const RentDetails = ({account, provider, place, bookRental, loading, setLoading}
   const [noOfDays, setNoOfDays] = useState();
 
   //****************************  code for no of days ***********************************
-  useEffect(async () => {
-    var today = new Date(
-      checkIn.split("-")[0],
-      checkIn.split("-")[1] - 1,
-      checkIn.split("-")[2]
-    );
+  useEffect(() => {
+    async function fetchData() {
 
-    var date2 = new Date(
-      checkOut.split("-")[0],
-      checkOut.split("-")[1] - 1,
-      checkOut.split("-")[2]
-    );
+      var today = new Date(
+        checkIn.split("-")[0],
+        checkIn.split("-")[1] - 1,
+        checkIn.split("-")[2]
+      );
 
-    var timeDiff = Math.abs(date2.getTime() - today.getTime());
-    var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
+      var date2 = new Date(
+        checkOut.split("-")[0],
+        checkOut.split("-")[1] - 1,
+        checkOut.split("-")[2]
+      );
 
-    setNoOfDays(diffDays);
+      var timeDiff = Math.abs(date2.getTime() - today.getTime());
+      var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
 
-    if(provider){
+      setNoOfDays(diffDays);
 
-      try{
+      if(provider){
 
-        const contract = new ethers.Contract(calendarAddress, Calendar.abi, provider.getSigner());                
-        const available = await contract.isAvailable(place.token, (new Date(checkIn)).getTime(), (new Date(checkOut)).getTime());  
-        
-        setAvailable(available);  
-  
-      }catch(e){
-        setAvailable(false);
-        console.log("Copntract call error!");
-      }  
+        try{
+
+          const contract = new ethers.Contract(calendarAddress, Calendar.abi, provider.getSigner());                
+          const available = await contract.isAvailable(place.token, (new Date(checkIn)).getTime(), (new Date(checkOut)).getTime());  
+          
+          setAvailable(available);  
+    
+        }catch(e){
+          setAvailable(false);
+          console.log("Copntract call error!");
+        }  
+      }
     }
+    fetchData();    
 
-  }, [checkIn, checkOut]);
+  }, [checkIn, checkOut, place, provider]);
 
   return isMobile ? (
   <Paper

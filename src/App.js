@@ -52,138 +52,124 @@ const App = () => {
       lng >= bound.sw_lng && lng <= bound.ne_lng);
   }
 
-  const loadRentals = async () => {
+  useEffect(() => {
 
-    if(provider){
+    async function fetchData() {
+      try{
 
-      const contract = new ethers.Contract(calendarAddress, Calendar.abi, provider);
+        const web3Modal = new Web3Modal();
+        const connection = await web3Modal.connect();
+        const provider = new ethers.providers.Web3Provider(connection);
+        const accounts = await provider.listAccounts();  
 
-      const balance = ethers.utils.formatUnits(await contract.totalSupply(), 0);
-  
-      let tokens = [];
-  
-      for(let i = 0; i < balance; i++){
-  
-        const tokenId = await contract.tokenByIndex(i);
-        const tokenURI = await contract.tokenURI(tokenId);
-        const meta = await axios.get(tokenURI);
+        setProvider(provider);    
+        setAccount(accounts[0]);  
 
-        if(checkBound(meta.data.latitude, 
-                      meta.data.longitude,
-                      bound)){
-
-          tokens.push({...meta.data, token: tokenId});
-        }  
-      }
-  
-      setRentals(tokens);  
-    }else{
-      setRentals([]);  
-    }
-  };
-
-  const loadProperties = async () => {
-
-    if(account){
-
-      const contract = new ethers.Contract(calendarAddress, Calendar.abi, provider.getSigner());
-      const balance = ethers.utils.formatUnits(await contract.balanceOf(account), 0);
-
-      let tokens = [];
-
-      for(let i = 0; i < balance; i++){
-
-        const tokenId = await contract.tokenOfOwnerByIndex(account, i);
-        const tokenURI = await contract.tokenURI(tokenId);
-        const meta = await axios.get(tokenURI);
-
-        tokens.push({...meta.data, token: tokenId});
+        if (connection) {
+          const handleAccountsChanged = (accounts) => {
+            setAccount(accounts[0]);
+            console.log("account changed...")
+          };
+      
+          const handleChainChanged = (chainId) => {
+            console.log("chain changed...")
+          };
+      
+          const handleDisconnect = () => {
+            setProvider(null);
+            setAccount(null);
+            console.log("disconnected...")
+          };
+      
+          connection.on("accountsChanged", handleAccountsChanged);
+          connection.on("chainChanged", handleChainChanged);
+          connection.on("disconnect", handleDisconnect);
+      
+          return () => {
+            if (connection.removeListener) {
+              connection.removeListener("accountsChanged", handleAccountsChanged);
+              connection.removeListener("chainChanged", handleChainChanged);
+              connection.removeListener("disconnect", handleDisconnect);
+            }
+          };
+        }
+    
+      }catch(e){
+        console.log("Contract call error!");
       }
 
-      setProperties(tokens);
+      console.log('connecting...');
     }
-  };
 
-  const loadTrips = async () => {
+    fetchData();
 
-    if(account){
-
-      const calendar = new ethers.Contract(calendarAddress, Calendar.abi, provider.getSigner());
-      const contract = new ethers.Contract(reservationAddress, Reservation.abi, provider.getSigner());
-
-      const balance = ethers.utils.formatUnits(await contract.balanceOf(account), 0);
-
-      let tokens = [];
-
-      for(let i = 0; i < balance; i++){
-
-        const tokenId = await contract.tokenOfOwnerByIndex(account, i);
-        const {reservationId, startTime, stopTime, calendarId} = await calendar.reservationOfOwnerByIndex(account, i);
-        const tokenURI = await calendar.tokenURI(calendarId);
-        const meta = await axios.get(tokenURI);
-
-        const checkIn = Number(ethers.utils.formatUnits(startTime, 0));
-        const checkOut = Number(ethers.utils.formatUnits(stopTime, 0));
-
-        tokens.push({place: meta.data, token: tokenId, checkIn: new Date(checkIn).toDateString(), checkOut: new Date(checkOut).toDateString()});  
-      }
-
-      setTrips(tokens);
-    }
-  };
-
-  useEffect(async () => {
-
-    try{
-
-      const web3Modal = new Web3Modal();
-      const connection = await web3Modal.connect();
-      const provider = new ethers.providers.Web3Provider(connection);
-      const accounts = await provider.listAccounts();  
-
-      setProvider(provider);    
-      setAccount(accounts[0]);  
-
-      if (connection) {
-        const handleAccountsChanged = (accounts) => {
-          setAccount(accounts[0]);
-          console.log("account changed...")
-        };
-    
-        const handleChainChanged = (chainId) => {
-          console.log("chain changed...")
-        };
-    
-        const handleDisconnect = () => {
-          setProvider(null);
-          setAccount(null);
-          console.log("disconnected...")
-        };
-    
-        connection.on("accountsChanged", handleAccountsChanged);
-        connection.on("chainChanged", handleChainChanged);
-        connection.on("disconnect", handleDisconnect);
-    
-        return () => {
-          if (connection.removeListener) {
-            connection.removeListener("accountsChanged", handleAccountsChanged);
-            connection.removeListener("chainChanged", handleChainChanged);
-            connection.removeListener("disconnect", handleDisconnect);
-          }
-        };
-      }
-  
-    }catch(e){
-
-    }
   }, []);
 
   useEffect(() => {
-    setIsLoading(true);
+
+    const loadProperties = async () => {
+
+      if(account){
+        setIsLoading(true);
+  
+        const contract = new ethers.Contract(calendarAddress, Calendar.abi, provider.getSigner());
+        const balance = ethers.utils.formatUnits(await contract.balanceOf(account), 0);
+  
+        let tokens = [];
+  
+        for(let i = 0; i < balance; i++){
+  
+          const tokenId = await contract.tokenOfOwnerByIndex(account, i);
+          const tokenURI = await contract.tokenURI(tokenId);
+          const meta = await axios.get(tokenURI);
+  
+          tokens.push({...meta.data, token: tokenId});
+        }
+  
+        setProperties(tokens);
+        setIsLoading(false);
+
+        console.log('loading properties...');
+      }
+    };
+
+    const loadTrips = async () => {
+
+      if(account){
+        setIsLoading(true);
+  
+        const calendar = new ethers.Contract(calendarAddress, Calendar.abi, provider.getSigner());
+        const contract = new ethers.Contract(reservationAddress, Reservation.abi, provider.getSigner());
+  
+        const balance = ethers.utils.formatUnits(await contract.balanceOf(account), 0);
+  
+        let tokens = [];
+  
+        for(let i = 0; i < balance; i++){
+  
+          const tokenId = await contract.tokenOfOwnerByIndex(account, i);
+          const {startTime, stopTime, calendarId} = await calendar.reservationOfOwnerByIndex(account, i);
+          const tokenURI = await calendar.tokenURI(calendarId);
+          const meta = await axios.get(tokenURI);
+  
+          const checkIn = Number(ethers.utils.formatUnits(startTime, 0));
+          const checkOut = Number(ethers.utils.formatUnits(stopTime, 0));
+  
+          tokens.push({place: meta.data, token: tokenId, checkIn: new Date(checkIn).toDateString(), checkOut: new Date(checkOut).toDateString()});  
+        }
+  
+        setTrips(tokens);
+
+        setIsLoading(false);
+
+        console.log('loading trips...');
+
+      }
+    };  
+  
     loadProperties();
     loadTrips();
-    setIsLoading(false);
-  }, [account]);
+  }, [account, provider]);
 
   useEffect(() => {
     setIsLoading(true);
@@ -199,10 +185,45 @@ const App = () => {
   }, [bound]);
 
   useEffect(() => {
-    setIsLoading(true);
+
+    const loadRentals = async () => {
+
+      if(provider){
+        
+        setIsLoading(true);
+  
+        const contract = new ethers.Contract(calendarAddress, Calendar.abi, provider);
+  
+        const balance = ethers.utils.formatUnits(await contract.totalSupply(), 0);
+    
+        let tokens = [];
+    
+        for(let i = 0; i < balance; i++){
+    
+          const tokenId = await contract.tokenByIndex(i);
+          const tokenURI = await contract.tokenURI(tokenId);
+          const meta = await axios.get(tokenURI);
+  
+          if(checkBound(meta.data.latitude, 
+                        meta.data.longitude,
+                        bound)){
+  
+            tokens.push({...meta.data, token: tokenId});
+          }  
+        }
+    
+        setRentals(tokens);  
+        setIsLoading(false);
+
+        console.log('loading rentals...');
+
+      }else{
+        setRentals([]);  
+      }
+    };
+  
     loadRentals();
-    setIsLoading(false);
-  }, [bound, account]);
+  }, [bound, account, provider]);
 
   return (
     <Routes>
@@ -273,6 +294,7 @@ const App = () => {
             provider={provider}
             trips={trips}
             properties={properties}
+            isLoading={isLoading}
           />
         } 
       />

@@ -2,34 +2,26 @@ import { LocalParkingOutlined, MeetingRoomOutlined } from "@mui/icons-material";
 import RentDetails from "../components/RentDetails";
 import ClaimDetails from "../components/ClaimDetails";
 import Calendar from "../components/Calendar"
+import { ethers } from "ethers";
 import {
-  InputBase,
   Rating,
-  TextField,
   Typography,
   Box,
   Divider,
   Container,
   useMediaQuery,
-  Paper,
   IconButton,
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
-import MenuIcon from "@mui/icons-material/Menu";
-import React, { useContext, useEffect, useState } from "react";
-// import { useMoralis, useWeb3ExecuteFunction } from "react-moralis";
+import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import styled from "styled-components";
-// import { ConnectButton, Icon, useNotification } from "web3uikit";
-import { searchFilterContext } from "../Context";
 
 import logo from "../images/airbnbRed.png";
 import mobileLogo from "../images/mobileLogoRed.png";
 import { useNavigate } from "react-router-dom";
 
 import { create as ipfsHttpClient } from 'ipfs-http-client'
-import { BigNumber, ethers } from 'ethers'
-import Web3Modal from "web3modal" 
 
 import {
   calendarAddress
@@ -58,8 +50,6 @@ const Details = ({account, provider}) => {
   }
 
   let isMobile = useMediaQuery("(max-width:850px)");
-  const { checkIn, setCheckIn, checkOut, setCheckOut, guests, setGuests } =
-    useContext(searchFilterContext);
 
   const StyledRating = styled(Rating)({
     "& .MuiRating-iconFilled": {
@@ -173,34 +163,33 @@ const Details = ({account, provider}) => {
 
   const client = ipfsHttpClient('https://ipfs.infura.io:5001/api/v0');
 
-  const dayPrice = place.rating ? Number(place.rating) / 50 : 0.07;
   const [loading, setLoading] = useState(false);
   // const dispatch = useNotification();
-  const handleSuccess = () => {
-  //   dispatch({
-  //     type: "success",
-  //     message: `Nice! You are going to ${place.location_string}!!`,
-  //     title: "Booking Succesful",
-  //     position: "topR",
-  //   });
-  };
-  const handleAccount = () => {
-  //   dispatch({
-  //     type: "error",
-  //     message: "To book a rental you must connect a wallet",
-  //     title: "Connect Your Wallet",
-  //     position: "topR",
-  //   });
-  };
+  // const handleSuccess = () => {
+  // //   dispatch({
+  // //     type: "success",
+  // //     message: `Nice! You are going to ${place.location_string}!!`,
+  // //     title: "Booking Succesful",
+  // //     position: "topR",
+  // //   });
+  // };
+  // const handleAccount = () => {
+  // //   dispatch({
+  // //     type: "error",
+  // //     message: "To book a rental you must connect a wallet",
+  // //     title: "Connect Your Wallet",
+  // //     position: "topR",
+  // //   });
+  // };
 
-  const handleError = (msg) => {
-    // dispatch({
-    //   type: "error",
-    //   message: `${msg}`,
-    //   title: "Booking Failed",
-    //   position: "topR",
-    // });
-  };
+  // const handleError = (msg) => {
+  //   // dispatch({
+  //   //   type: "error",
+  //   //   message: `${msg}`,
+  //   //   title: "Booking Failed",
+  //   //   position: "topR",
+  //   // });
+  // };
 
   const bookRental = async (place, checkIn, checkOut) => {
 
@@ -374,7 +363,7 @@ const Details = ({account, provider}) => {
               WiFi.
             </Typography>
           </Box>
-        {isRent() &&
+        {(isRent() &&
         <RentDetails 
           account={account}
           provider={provider}
@@ -382,8 +371,8 @@ const Details = ({account, provider}) => {
           bookRental={bookRental}
           loading={loading}
           setLoading={setLoading}
-        /> ||
-        isClaim() &&
+        />) ||
+        (isClaim() &&
         <ClaimDetails 
           account={account}
           provider={provider}
@@ -391,13 +380,13 @@ const Details = ({account, provider}) => {
           claimProperty={claimProperty}
           loading={loading}
           setLoading={setLoading}
-        />||
-        isProperty() &&
+        />)||
+        (isProperty() &&
         <Calendar 
           account={account}
           provider={provider}
           place={place}
-        />}
+        />)}
         </Box>
       </Container>
     </Box>

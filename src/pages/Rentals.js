@@ -1,10 +1,8 @@
 import React, { createRef, useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import AddIcon from "@mui/icons-material/Add";
 import logo from "../images/airbnbRed.png";
 import mobileLogo from "../images/mobileLogoRed.png";
 import ReactLoading from "react-loading";
-// import { ConnectButton } from "web3uikit";
 import Map from "../components/Map";
 import PlaceDetails from "../components/PlaceDetails";
 import { searchFilterContext } from "../Context";
@@ -60,6 +58,7 @@ const Rentals = ({
     guests,
     setGuests,
   } = useContext(searchFilterContext);
+  
   useEffect(() => {
     setDestination(JSON.parse(localStorage.getItem("destination")));
     setCheckIn(localStorage.getItem("checkIn"));
@@ -228,14 +227,14 @@ const Rentals = ({
         </Box>}
         <Box display="flex">
           {/* <ConnectButton /> */}
-          {account && (
+          {(account && (
             <IconButton
               sx={{ color: "#EB4E5F" }}
               onClick={() => navigate("/account")}
             >
               <PersonIcon />
             </IconButton>
-          )}
+          ))}
         </Box>
       </Box>
 
@@ -252,7 +251,7 @@ const Rentals = ({
         ) : (
           <Box varient="body1" sx={styles.rentalsContentL}>
             <Box>
-              {isClaims() &&
+              {(isClaims() &&
               <Autocomplete onLoad={onLoad} onPlaceChanged={onPlaceChanged}>
                 <TextField
                   variant="standard"
@@ -266,10 +265,10 @@ const Rentals = ({
                   fullWidth
                   InputProps={{ disableUnderline: true }}
                 />
-              </Autocomplete>}
+              </Autocomplete>)}
               <Typography varient="body2" fontSize={15}>
-                {isRentals() && "Stays Available For Your Destination" ||
-                isClaims() && ("Properties Available To Claim")}
+                {(isRentals() && "Stays Available For Your Destination") ||
+                (isClaims() && ("Properties Available To Claim"))}
               </Typography>
             </Box>
             {isLoading ? (

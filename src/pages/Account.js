@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React, { useEffect, useState } from "react";
+import React from "react";
 
 import {
   Box,
@@ -10,7 +10,6 @@ import {
   Tabs,
   Tab,
   Button,
-  Grid,
 } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import ReactLoading from "react-loading";
@@ -53,7 +52,7 @@ function a11yProps(index) {
   };
 }
 
-export default function Account({account, provider, trips, properties}) {
+export default function Account({account, provider, trips, properties, isLoading}) {
 
   let isMobile = useMediaQuery("(max-width:850px)");
   const styles = {
@@ -72,7 +71,6 @@ export default function Account({account, provider, trips, properties}) {
   };
 
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
   const [value, setValue] = React.useState(0);
 
   const handleChange = (event, newValue) => {
