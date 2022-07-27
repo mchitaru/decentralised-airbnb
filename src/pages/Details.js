@@ -60,7 +60,8 @@ const Details = ({account, provider, places}) => {
 
   const navigate = useNavigate();
   const { state: place } = useLocation();
-  const [isClaimable, setIsClaimable] = useState(true);
+  const [claimable, setClaimable] = useState(false);
+  const [available, setAvailable] = useState(false);
 
   // const contractProcessor = useWeb3ExecuteFunction();
 
@@ -125,11 +126,11 @@ const Details = ({account, provider, places}) => {
 
     if(places){
 
-      setIsClaimable(places.find((otherPlace) => (otherPlace.latitude === place.latitude &&
+      setClaimable(places.find((otherPlace) => (otherPlace.latitude === place.latitude &&
                                                   otherPlace.longitude === place.longitude)));
     }
 
-  }, [places])
+  }, [place, places])
 
   // ****************** Connecting with Blockchain and functions **************************
 
@@ -157,7 +158,7 @@ const Details = ({account, provider, places}) => {
 
       const url = uploadToIPFS(place);
 
-      console.log(`Url: ${url}`);
+      // console.log(`Url: ${url}`);
 
       try{
 
@@ -165,7 +166,7 @@ const Details = ({account, provider, places}) => {
         const transaction = await contract.mint(url);
         await transaction.wait();  
 
-        setIsClaimable(false);
+        setClaimable(false);
   
       }catch(e){
         console.log("Error during contract call!")
@@ -205,6 +206,29 @@ const Details = ({account, provider, places}) => {
   //   // });
   // };
 
+  const cancelBooking = async (reservationId) => {
+
+    if(account != null){
+
+      setLoading(true);
+
+      try{
+
+        const contract = new ethers.Contract(calendarAddress, CalendarABI.abi, provider.getSigner());
+
+        const transaction = await contract.cancel(place.token, reservationId);
+        await transaction.wait();  
+
+      }catch(e){
+        console.log("Error during contract call!")
+      }
+      
+      setLoading(false);
+
+      // navigate("/account");
+    }
+  };
+
   const bookRental = async (place, checkIn, checkOut) => {
 
     if(account != null){
@@ -217,6 +241,8 @@ const Details = ({account, provider, places}) => {
 
         const transaction = await contract.reserve(place.token, (new Date(checkIn)).getTime(), (new Date(checkOut)).getTime());
         await transaction.wait();  
+
+        setAvailable(false);
 
       }catch(e){
         console.log("Error during contract call!")
@@ -385,13 +411,15 @@ const Details = ({account, provider, places}) => {
           bookRental={bookRental}
           loading={loading}
           setLoading={setLoading}
+          available={available}
+          setAvailable={setAvailable}
         />) ||
         (isClaim() &&
         <ClaimDetails 
           account={account}
           provider={provider}
           place={place}
-          isClaimable={isClaimable}
+          claimable={claimable}
           claimProperty={claimProperty}
           loading={loading}
           setLoading={setLoading}
@@ -401,6 +429,7 @@ const Details = ({account, provider, places}) => {
           account={account}
           provider={provider}
           place={place}
+          cancelBooking={cancelBooking}
         />)}
         </Box>
       </Container>

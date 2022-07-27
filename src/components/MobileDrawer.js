@@ -114,7 +114,7 @@ function SwipeableEdgeDrawer(props) {
           }}
         >
           {/* <Skeleton variant="rectangular" height="100%" /> */}
-          {props.isLoading ? (
+          {props.loading ? (
             <Box
               style={{
                 display: "flex",

@@ -11,21 +11,11 @@ import {
   Container,
   useMediaQuery,
   Paper,
-  IconButton,
 } from "@mui/material";
-import { searchFilterContext } from "../Context";
 
-const ClaimDetails = ({account, provider, place, isClaimable, claimProperty, loading, setLoading}) => {
+const ClaimDetails = ({account, provider, place, claimable, claimProperty, loading, setLoading}) => {
 
   let isMobile = useMediaQuery("(max-width:850px)");
-  const { checkIn, setCheckIn, checkOut, setCheckOut, guests, setGuests } =
-    useContext(searchFilterContext);
-
-  const StyledRating = styled(Rating)({
-    "& .MuiRating-iconFilled": {
-      color: "#EB4E5F",
-    },
-  });
 
 //***********************************   Styles *****************************************
 
@@ -98,7 +88,7 @@ const ClaimDetails = ({account, provider, place, isClaimable, claimProperty, loa
   >
       <LoadingButton
       loading={loading}
-      disabled = {!isClaimable}
+      disabled = {!claimable}
       onClick={() => {claimProperty(place)}}
       variant="text"
       sx={{
@@ -126,7 +116,7 @@ const ClaimDetails = ({account, provider, place, isClaimable, claimProperty, loa
       <LoadingButton
           fullWidth
           loading={loading}
-          disabled = {!isClaimable}
+          disabled = {!claimable}
           onClick={() => {claimProperty(place)}}
           variant="text"
           sx={{

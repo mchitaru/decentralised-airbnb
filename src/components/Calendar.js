@@ -3,16 +3,10 @@ import FullCalendar from '@fullcalendar/react' // must go before plugins
 import dayGridPlugin from '@fullcalendar/daygrid' // a plugin!
 import listViewPlugin from '@fullcalendar/list' // a plugin!
 import {
-  InputBase,
-  Rating,
-  TextField,
-  Typography,
   Box,
-  Divider,
-  Container,
-  useMediaQuery,
-  Paper,
-  IconButton,
+  Menu,
+  MenuItem,
+  Tooltip
 } from "@mui/material";
 
 import { ethers } from 'ethers'
@@ -25,9 +19,45 @@ import {
 import CalendarABI from '../artifacts/contracts/Calendar.sol/Calendar.json'
 
 
-const Calendar = ({account, provider, place}) => {
+const Calendar = ({account, provider, place, cancelBooking}) => {
 
+  const [eventId, setEventId] = useState(null);
   const [events, setEvents] = useState([]);
+  const [contextMenu, setContextMenu] = useState(null);
+
+  const handleContextMenu = (ev) => {
+
+    if(eventId){
+      ev.preventDefault();
+      setContextMenu(
+        contextMenu === null
+          ? {
+              mouseX: ev.clientX + 2,
+              mouseY: ev.clientY - 6,
+            }
+          : // repeated contextmenu when it is already open closes it with Chrome 84 on Ubuntu
+            // Other native context menus might behave different.
+            // With this behavior we prevent contextmenu from the backdrop to re-locale existing context menus.
+            null,
+      );  
+    }
+  };
+
+  async function handleCancel() {
+
+    if(cancelBooking){
+
+      await cancelBooking(eventId);      
+    }    
+
+    handleClose();
+  };
+
+  function handleClose() {
+
+    setContextMenu(null);
+    setEventId(null);
+  };
 
   function hashCode(str) { // java String#hashCode
     var hash = 0;
@@ -43,6 +73,18 @@ const Calendar = ({account, provider, place}) => {
           .toUpperCase();
 
       return "#00000".substring(1, 6 - c.length) + c;
+  }
+
+  function onMouseEnter(info) {
+    info.el.style.border = '1px solid black';
+    setEventId(info.event.id);
+  }
+
+  function onMouseLeave(info) {
+    if(!contextMenu){
+      setEventId(null);
+    }
+    info.el.style.border = '0px solid black';
   }
 
   useEffect(async () => {
@@ -67,11 +109,14 @@ const Calendar = ({account, provider, place}) => {
           const checkOut = Number(ethers.utils.formatUnits(stopTime, 0));
   
           tokens.push({
+            id: reservationId,
+            title: owner.slice(0, 6).concat('...'),
             start: new Date(checkIn).toISOString(), 
             end: new Date(checkOut).toISOString(), 
             allDay: true, 
             color: intToRGB(hashCode(account)), 
-            display: 'background'});
+            display: 'background'
+          });
         }
   
         // console.log(tokens);
@@ -79,11 +124,11 @@ const Calendar = ({account, provider, place}) => {
         setEvents(tokens);  
       
       }catch(e){
-        console.log("Copntract call error!");
+        console.log("Contract call error!");
       }
     }
 
-  }, [account]);
+  }, [account, place, contextMenu]);
 
   const styles = {
     line: {
@@ -106,13 +151,31 @@ const Calendar = ({account, provider, place}) => {
   }
 
   return (
-    <Box sx={styles.card}>
-      <FullCalendar
+    <Box sx={styles.card} onContextMenu={handleContextMenu} style={{ cursor: 'context-menu' }}>
+      <FullCalendar        
         plugins={[ dayGridPlugin, listViewPlugin ]}
         initialView="dayGridMonth"
-        editable={true}
+        headerToolbar= {{
+          left: 'prev,next today',
+          center: 'title',
+          right: 'dayGridMonth,listWeek'
+        }}
         events={events}
+        eventMouseEnter={onMouseEnter}
+        eventMouseLeave={onMouseLeave}
       />
+      <Menu
+        open={contextMenu !== null}
+        onClose={handleClose}
+        anchorReference="anchorPosition"
+        anchorPosition={
+          contextMenu !== null
+            ? { top: contextMenu.mouseY, left: contextMenu.mouseX }
+            : undefined
+        }
+      >
+        <MenuItem onClick={handleCancel}>Cancel</MenuItem>
+      </Menu>      
     </Box>
   )
 }

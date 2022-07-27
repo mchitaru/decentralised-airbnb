@@ -1,11 +1,23 @@
-import React from "react";
+import React, { useState } from "react";
 // import { Icon } from "web3uikit";
 import { Link } from "react-router-dom";
 import { Button, Box, useMediaQuery } from "@mui/material";
+import LoadingButton from "@mui/lab/LoadingButton";
 import placeholder from "../images/placeholder.png";
 
-const TripDetails = ({ trip, isMobile }) => {
+const TripDetails = ({ trip, cancelBooking, isMobile }) => {
   const isSmall = useMediaQuery("(max-width:420px)");
+
+  const [loading, setLoading] = useState(false);
+
+  async function onCancelClick(){
+
+    setLoading(true);
+
+    await cancelBooking(trip.place.token, trip.token);
+
+    setLoading(false);
+  }
 
   const styles = {
     rentalDivH: {
@@ -102,25 +114,21 @@ const TripDetails = ({ trip, isMobile }) => {
           </Box>
           <Box sx={styles.rentalDesc}>{trip.place.location_string}</Box>
           <Box sx={styles.bottomButton}>
-            <Link
-              to="/trip"
-              style={{ textDecoration: "none" }}
-              state={trip}
-            >
-              <Button
-                size="small"
-                variant="outlined"
-                sx={{
-                  color: "#d44957",
+            <LoadingButton
+              loading={loading}
+              size="small"
+              variant="outlined"
+              onClick={() => onCancelClick()}
+              sx={{
+                color: "#d44957",
+                borderColor: "#d44957",
+                ":hover": {
                   borderColor: "#d44957",
-                  ":hover": {
-                    borderColor: "#d44957",
-                  },
-                }}
-              >
-                "Details"
-              </Button>
-            </Link>
+                },
+              }}
+            >
+              Cancel
+            </LoadingButton>
           </Box>
         </Box>
       </Box>

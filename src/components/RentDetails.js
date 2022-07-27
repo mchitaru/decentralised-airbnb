@@ -20,7 +20,7 @@ import {
 
 import Calendar from '../artifacts/contracts/Calendar.sol/Calendar.json'
 
-const RentDetails = ({account, provider, place, bookRental, loading, setLoading}) => {
+const RentDetails = ({account, provider, place, bookRental, loading, setLoading, available, setAvailable}) => {
 
   let isMobile = useMediaQuery("(max-width:850px)");
   const { checkIn, setCheckIn, checkOut, setCheckOut, guests, setGuests } =
@@ -88,7 +88,6 @@ const RentDetails = ({account, provider, place, bookRental, loading, setLoading}
     },
   };
 
-  const [available, setAvailable] = useState(true);
   const [noOfDays, setNoOfDays] = useState();
 
   //****************************  code for no of days ***********************************

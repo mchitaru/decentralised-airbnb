@@ -1,6 +1,5 @@
 import PropTypes from 'prop-types';
 import React from "react";
-
 import {
   Box,
   Container,
@@ -9,7 +8,7 @@ import {
   Typography,
   Tabs,
   Tab,
-  Button,
+  Button
 } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import ReactLoading from "react-loading";
@@ -52,7 +51,7 @@ function a11yProps(index) {
   };
 }
 
-export default function Account({account, provider, trips, properties, isLoading}) {
+export default function Account({account, provider, trips, properties, loading, cancelBooking}) {
 
   let isMobile = useMediaQuery("(max-width:850px)");
   const styles = {
@@ -114,7 +113,7 @@ export default function Account({account, provider, trips, properties, isLoading
       </Box>
       <TabPanel value={value} index={0}>        
         <Container sx={{minWidth:"xl"}}>
-          {isLoading ? (
+          {loading ? (
             <ReactLoading
               type="bubbles"
               color="  #EB4E5F"
@@ -130,6 +129,7 @@ export default function Account({account, provider, trips, properties, isLoading
                       <TripDetails
                         trip={trip}
                         isMobile={isMobile}
+                        cancelBooking={cancelBooking}
                       />
                     </Box>              
                   </Box>              
@@ -162,7 +162,7 @@ export default function Account({account, provider, trips, properties, isLoading
       </TabPanel>
       <TabPanel value={value} index={1}>
         <Container sx={{minWidth:"xl"}}>
-          {isLoading ? (
+          {loading ? (
             <ReactLoading
               type="bubbles"
               color="  #EB4E5F"

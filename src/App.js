@@ -30,7 +30,7 @@ const App = () => {
 
   const [coordinates, setCoordinates] = useState({});
   const [autocomplete, setAutocomplete] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [childClicked, setChildClicked] = useState(null);
 
   const { destination, setDestination } = useContext(searchFilterContext);
@@ -50,25 +50,27 @@ const App = () => {
       lng >= bound.sw_lng && lng <= bound.ne_lng);
   }
 
-  // useEffect(() => {
+  async function cancelBooking (calendarId, reservationId) {
 
-  //   // if(!claims || claims.length){
+    if(account != null){
 
-  //     setIsLoading(true);
-      
-  //     console.log('loading places...' + claims.length);
+      console.log(calendarId);
+      console.log(reservationId);
 
-  //     getData(bound, "hotels").then((data) => {
-  //       setPlaces(data?.filter((place) => {
-  //         return place.name &&
-  //           checkBound(place.latitude, place.longitude, bound) /*&&
-  //           (!claims || !claims.find((claim) => (claim.latitude === place.latitude && claim.longitude === place.longitude)))*/
-  //       }));
-  //       setIsLoading(false);
-  //     });
-  //   // }
+      try{
 
-  // }, [bound]);
+        const contract = new ethers.Contract(calendarAddress, Calendar.abi, provider.getSigner());
+
+        const transaction = await contract.cancel(calendarId, reservationId);
+        await transaction.wait();  
+
+      }catch(e){
+        console.log("Error during contract call!")
+      }
+
+      // navigate("/account");
+    }
+  };
 
   useEffect(() => {
 
@@ -128,7 +130,7 @@ const App = () => {
 
       if(account){
   
-        setIsLoading(true);
+        setLoading(true);
 
         console.log('loading properties...');
         
@@ -157,14 +159,14 @@ const App = () => {
         else
           setProperties(null);
 
-        setIsLoading(false);
+        setLoading(false);
       }
     };
 
     const loadTrips = async () => {
 
       if(account){
-        setIsLoading(true);
+        setLoading(true);
 
         console.log('loading trips...');
         
@@ -177,15 +179,14 @@ const App = () => {
         
           for(let i = 0; i < balance; i++){
     
-            const tokenId = await contract.reservationOfOwnerByIndex(account, i);
-            const {startTime, stopTime, calendarId} = await contract.reservationOfOwnerByIndex(account, i);
+            const {reservationId, startTime, stopTime, calendarId} = await contract.reservationOfOwnerByIndex(account, i);
             const tokenURI = await contract.tokenURI(calendarId);
             const meta = await axios.get(tokenURI);
     
             const checkIn = Number(ethers.utils.formatUnits(startTime, 0));
             const checkOut = Number(ethers.utils.formatUnits(stopTime, 0));
     
-            tokens.push({place: meta.data, token: tokenId, checkIn: new Date(checkIn).toDateString(), checkOut: new Date(checkOut).toDateString()});  
+            tokens.push({place: meta.data, token: reservationId, checkIn: new Date(checkIn).toDateString(), checkOut: new Date(checkOut).toDateString()});  
           }
 
         }catch(e){
@@ -197,7 +198,7 @@ const App = () => {
         else
           setTrips(null);
 
-        setIsLoading(false);
+        setLoading(false);
       }
     };  
   
@@ -223,7 +224,7 @@ const App = () => {
     const loadRentals = async () => {
       if(provider){
         
-        setIsLoading(true);
+        setLoading(true);
 
         console.log('loading rentals...');
         
@@ -260,7 +261,7 @@ const App = () => {
         
         loadPlaces(claims);
 
-        setIsLoading(false);
+        setLoading(false);
 
       }else{
         setRentals([]);  
@@ -291,7 +292,7 @@ const App = () => {
           <Rentals
             account={account}
             provider={provider}
-            isLoading={isLoading}
+            loading={loading}
             autocomplete={autocomplete}
             bound={bound}
             setAutocomplete={setAutocomplete}
@@ -341,7 +342,8 @@ const App = () => {
             provider={provider}
             trips={trips}
             properties={properties}
-            isLoading={isLoading}
+            loading={loading}
+            cancelBooking={cancelBooking}
           />
         } 
       />
@@ -351,7 +353,7 @@ const App = () => {
           <Rentals
             account={account}
             provider={provider}
-            isLoading={isLoading}
+            loading={loading}
             autocomplete={autocomplete}
             setAutocomplete={setAutocomplete}
             onPlaceChanged={onPlaceChanged}

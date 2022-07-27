@@ -21,7 +21,7 @@ import SwipeableEdgeDrawer from "../components/MobileDrawer";
 const Rentals = ({
   account,
   provider,
-  isLoading,
+  loading,
   places,
   coordinates,
   setCoordinates,
@@ -246,7 +246,7 @@ const Rentals = ({
             places={places}
             childClicked={childClicked}
             isMobile={isMobile}
-            isLoading={isLoading}
+            loading={loading}
           />
         ) : (
           <Box varient="body1" sx={styles.rentalsContentL}>
@@ -271,7 +271,7 @@ const Rentals = ({
                 (isClaims() && ("Properties Available To Claim"))}
               </Typography>
             </Box>
-            {isLoading ? (
+            {loading ? (
               <Box
                 style={{
                   display: "flex",
