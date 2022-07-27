@@ -14,7 +14,7 @@ import {
   IconButton,
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import styled from "styled-components";
 
@@ -30,7 +30,7 @@ import {
 
 import CalendarABI from '../artifacts/contracts/Calendar.sol/Calendar.json'
 
-const Details = ({account, provider}) => {
+const Details = ({account, provider, places}) => {
   const rentalsList = {
     attributes: {
       unoDescription: "2 Guests • 2 Beds • 1 Rooms",
@@ -60,6 +60,7 @@ const Details = ({account, provider}) => {
 
   const navigate = useNavigate();
   const { state: place } = useLocation();
+  const [isClaimable, setIsClaimable] = useState(true);
 
   // const contractProcessor = useWeb3ExecuteFunction();
 
@@ -120,6 +121,16 @@ const Details = ({account, provider}) => {
     },
   };
 
+  useEffect(() => {
+
+    if(places){
+
+      setIsClaimable(places.find((otherPlace) => (otherPlace.latitude === place.latitude &&
+                                                  otherPlace.longitude === place.longitude)));
+    }
+
+  }, [places])
+
   // ****************** Connecting with Blockchain and functions **************************
 
   async function uploadToIPFS(place) {
@@ -153,6 +164,8 @@ const Details = ({account, provider}) => {
         const contract = new ethers.Contract(calendarAddress, CalendarABI.abi, provider.getSigner());
         const transaction = await contract.mint(url);
         await transaction.wait();  
+
+        setIsClaimable(false);
   
       }catch(e){
         console.log("Error during contract call!")
@@ -378,6 +391,7 @@ const Details = ({account, provider}) => {
           account={account}
           provider={provider}
           place={place}
+          isClaimable={isClaimable}
           claimProperty={claimProperty}
           loading={loading}
           setLoading={setLoading}

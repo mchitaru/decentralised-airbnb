@@ -15,7 +15,7 @@ import {
 } from "@mui/material";
 import { searchFilterContext } from "../Context";
 
-const ClaimDetails = ({account, provider, place, claimProperty, loading, setLoading}) => {
+const ClaimDetails = ({account, provider, place, isClaimable, claimProperty, loading, setLoading}) => {
 
   let isMobile = useMediaQuery("(max-width:850px)");
   const { checkIn, setCheckIn, checkOut, setCheckOut, guests, setGuests } =
@@ -83,8 +83,6 @@ const ClaimDetails = ({account, provider, place, claimProperty, loading, setLoad
     },
   };
 
-  const [available, setAvailable] = useState(true);
-
   return isMobile ? (
   <Paper
       sx={{
@@ -100,7 +98,7 @@ const ClaimDetails = ({account, provider, place, claimProperty, loading, setLoad
   >
       <LoadingButton
       loading={loading}
-      disabled = {!available}
+      disabled = {!isClaimable}
       onClick={() => {claimProperty(place)}}
       variant="text"
       sx={{
@@ -128,7 +126,7 @@ const ClaimDetails = ({account, provider, place, claimProperty, loading, setLoad
       <LoadingButton
           fullWidth
           loading={loading}
-          disabled = {!available}
+          disabled = {!isClaimable}
           onClick={() => {claimProperty(place)}}
           variant="text"
           sx={{

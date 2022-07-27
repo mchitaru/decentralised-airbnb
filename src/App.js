@@ -13,12 +13,10 @@ import Web3Modal from "web3modal"
 import axios from 'axios'
 
 import {
-  calendarAddress, reservationAddress
+  calendarAddress
 } from './artifacts/config' 
 
 import Calendar from './artifacts/contracts/Calendar.sol/Calendar.json'
-import Reservation from './artifacts/contracts/Reservation.sol/Reservation.json'
-
 
 const App = () => {
   const [provider, setProvider] = useState(null);
@@ -52,11 +50,33 @@ const App = () => {
       lng >= bound.sw_lng && lng <= bound.ne_lng);
   }
 
+  // useEffect(() => {
+
+  //   // if(!claims || claims.length){
+
+  //     setIsLoading(true);
+      
+  //     console.log('loading places...' + claims.length);
+
+  //     getData(bound, "hotels").then((data) => {
+  //       setPlaces(data?.filter((place) => {
+  //         return place.name &&
+  //           checkBound(place.latitude, place.longitude, bound) /*&&
+  //           (!claims || !claims.find((claim) => (claim.latitude === place.latitude && claim.longitude === place.longitude)))*/
+  //       }));
+  //       setIsLoading(false);
+  //     });
+  //   // }
+
+  // }, [bound]);
+
   useEffect(() => {
 
     async function fetchData() {
-      try{
 
+      console.log('connecting...');
+
+      try{
         const web3Modal = new Web3Modal();
         const connection = await web3Modal.connect();
         const provider = new ethers.providers.Web3Provider(connection);
@@ -92,13 +112,10 @@ const App = () => {
               connection.removeListener("disconnect", handleDisconnect);
             }
           };
-        }
-    
+        }    
       }catch(e){
         console.log("Contract call error!");
       }
-
-      console.log('connecting...');
     }
 
     fetchData();
@@ -110,20 +127,29 @@ const App = () => {
     const loadProperties = async () => {
 
       if(account){
+  
         setIsLoading(true);
-  
-        const contract = new ethers.Contract(calendarAddress, Calendar.abi, provider.getSigner());
-        const balance = ethers.utils.formatUnits(await contract.balanceOf(account), 0);
-  
+
+        console.log('loading properties...');
+        
         let tokens = [];
+
+        try{
+
+          const contract = new ethers.Contract(calendarAddress, Calendar.abi, provider.getSigner());
+          const balance = ethers.utils.formatUnits(await contract.balanceOf(account), 0);
+        
+          for(let i = 0; i < balance; i++){
+    
+            const tokenId = await contract.tokenOfOwnerByIndex(account, i);
+            const tokenURI = await contract.tokenURI(tokenId);
+            const meta = await axios.get(tokenURI);
+    
+            tokens.push({...meta.data, token: tokenId});
+          }
   
-        for(let i = 0; i < balance; i++){
-  
-          const tokenId = await contract.tokenOfOwnerByIndex(account, i);
-          const tokenURI = await contract.tokenURI(tokenId);
-          const meta = await axios.get(tokenURI);
-  
-          tokens.push({...meta.data, token: tokenId});
+        }catch(e){
+          console.log("Contract call error!");
         }
   
         if(tokens.length)
@@ -132,8 +158,6 @@ const App = () => {
           setProperties(null);
 
         setIsLoading(false);
-
-        console.log('loading properties...');
       }
     };
 
@@ -141,25 +165,31 @@ const App = () => {
 
       if(account){
         setIsLoading(true);
-  
-        const calendar = new ethers.Contract(calendarAddress, Calendar.abi, provider.getSigner());
-        const contract = new ethers.Contract(reservationAddress, Reservation.abi, provider.getSigner());
-  
-        const balance = ethers.utils.formatUnits(await contract.balanceOf(account), 0);
-  
+
+        console.log('loading trips...');
+        
         let tokens = [];
-  
-        for(let i = 0; i < balance; i++){
-  
-          const tokenId = await contract.tokenOfOwnerByIndex(account, i);
-          const {startTime, stopTime, calendarId} = await calendar.reservationOfOwnerByIndex(account, i);
-          const tokenURI = await calendar.tokenURI(calendarId);
-          const meta = await axios.get(tokenURI);
-  
-          const checkIn = Number(ethers.utils.formatUnits(startTime, 0));
-          const checkOut = Number(ethers.utils.formatUnits(stopTime, 0));
-  
-          tokens.push({place: meta.data, token: tokenId, checkIn: new Date(checkIn).toDateString(), checkOut: new Date(checkOut).toDateString()});  
+
+        try{
+
+          const contract = new ethers.Contract(calendarAddress, Calendar.abi, provider.getSigner());  
+          const balance = ethers.utils.formatUnits(await contract.reservationBalanceOfOwner(account), 0);
+        
+          for(let i = 0; i < balance; i++){
+    
+            const tokenId = await contract.reservationOfOwnerByIndex(account, i);
+            const {startTime, stopTime, calendarId} = await contract.reservationOfOwnerByIndex(account, i);
+            const tokenURI = await contract.tokenURI(calendarId);
+            const meta = await axios.get(tokenURI);
+    
+            const checkIn = Number(ethers.utils.formatUnits(startTime, 0));
+            const checkOut = Number(ethers.utils.formatUnits(stopTime, 0));
+    
+            tokens.push({place: meta.data, token: tokenId, checkIn: new Date(checkIn).toDateString(), checkOut: new Date(checkOut).toDateString()});  
+          }
+
+        }catch(e){
+          console.log("Contract call error!");
         }
   
         if(tokens.length)
@@ -168,8 +198,6 @@ const App = () => {
           setTrips(null);
 
         setIsLoading(false);
-
-        console.log('loading trips...');
       }
     };  
   
@@ -178,50 +206,61 @@ const App = () => {
   }, [account, provider]);
 
   useEffect(() => {
-    setIsLoading(true);
-    getData(bound, "hotels").then((data) => {
-      setPlaces(data?.filter((place) => {
-        return place.name &&
-          checkBound(place.latitude, 
-            place.longitude,
-            bound)
-      }));
-      setIsLoading(false);
-    });
-  }, [bound]);
+    
+    function loadPlaces(claims) {
 
-  useEffect(() => {
+      console.log('loading places...');
+
+      getData(bound, "hotels").then((data) => {
+        setPlaces(data?.filter((place) => {
+          return place.name &&
+            checkBound(place.latitude, place.longitude, bound) &&
+            (!claims || !claims.find((claim) => (claim.latitude === place.latitude && claim.longitude === place.longitude)))
+        }));
+      });
+    }
 
     const loadRentals = async () => {
-
       if(provider){
         
         setIsLoading(true);
-  
-        const contract = new ethers.Contract(calendarAddress, Calendar.abi, provider);
-  
-        const balance = ethers.utils.formatUnits(await contract.totalSupply(), 0);
-    
-        let tokens = [];
-    
-        for(let i = 0; i < balance; i++){
-    
-          const tokenId = await contract.tokenByIndex(i);
-          const tokenURI = await contract.tokenURI(tokenId);
-          const meta = await axios.get(tokenURI);
-  
-          if(checkBound(meta.data.latitude, 
-                        meta.data.longitude,
-                        bound)){
-  
-            tokens.push({...meta.data, token: tokenId});
-          }  
-        }
-    
-        setRentals(tokens);  
-        setIsLoading(false);
 
         console.log('loading rentals...');
+        
+        let claims = [];
+        let tokens = [];
+
+        try{
+
+          const contract = new ethers.Contract(calendarAddress, Calendar.abi, provider);
+  
+          const balance = ethers.utils.formatUnits(await contract.totalSupply(), 0);
+            
+          for(let i = 0; i < balance; i++){
+      
+            const tokenId = await contract.tokenByIndex(i);
+            const tokenURI = await contract.tokenURI(tokenId);
+            const meta = await axios.get(tokenURI);
+
+            claims.push({...meta.data, token: tokenId});
+            
+            if(checkBound(meta.data.latitude, 
+                          meta.data.longitude,
+                          bound)){
+    
+              tokens.push({...meta.data, token: tokenId});
+            }  
+          }
+  
+        }catch(e){
+          console.log("Contract call error!");
+        }
+
+        setRentals(tokens);  
+        
+        loadPlaces(claims);
+
+        setIsLoading(false);
 
       }else{
         setRentals([]);  
@@ -229,7 +268,8 @@ const App = () => {
     };
   
     loadRentals();
-  }, [bound, account, provider]);
+
+  }, [bound, provider]);
 
   return (
     <Routes>
@@ -280,6 +320,7 @@ const App = () => {
           <Details 
             account={account}
             provider={provider}
+            places={places}
           />
         } 
       />

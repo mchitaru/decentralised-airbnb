@@ -13,8 +13,8 @@ import "hardhat/console.sol";
 contract Calendar is IERC809, Pausable, ERC721Enumerable, ERC721URIStorage {
   using TreeMap for TreeMap.Map;
 
-  // limit reservation duration to 8 hours because we do not have spam protection yet
-  uint256 constant public RESERVATION_DURATION_LIMIT = 8760 hours * 1000;
+  // limit reservation duration to 7 days because we do not have spam protection yet
+  uint256 constant public RESERVATION_DURATION_LIMIT = 168 hours * 1000;
 
   // mapping of token(calendar) id to mapping from start/end timestamp of a reservation to its id
   mapping(uint256 => TreeMap.Map) public startTimestampsMap;
@@ -26,37 +26,35 @@ contract Calendar is IERC809, Pausable, ERC721Enumerable, ERC721URIStorage {
     reservationContract = address(new Reservation());
   }
 
-  function _beforeTokenTransfer(
-      address from,
-      address to,
-      uint256 tokenId
-  ) internal
-    override(ERC721, ERC721Enumerable) 
+  function _beforeTokenTransfer(address from, address to, uint256 tokenId) 
+  internal
+  override(ERC721, ERC721Enumerable) 
   {
       super._beforeTokenTransfer(from, to, tokenId);
   }
   
   function supportsInterface(bytes4 interfaceId)
-      public
-      view
-      override(ERC721, ERC721Enumerable, IERC165)
-      returns (bool)
+  public
+  view
+  override(ERC721, ERC721Enumerable, IERC165)
+  returns (bool)
   {
       return super.supportsInterface(interfaceId);
   }
 
   function _burn(uint256 _tokenId)
   internal
+  whenNotPaused()
     override(ERC721, ERC721URIStorage)
   {
     super._burn(_tokenId);
   } 
 
   function tokenURI(uint256 tokenId)
-    public 
-    view 
-    override(ERC721, ERC721URIStorage) 
-    returns (string memory) 
+  public 
+  view 
+  override(ERC721, ERC721URIStorage) 
+  returns (string memory) 
   {    
     return super.tokenURI(tokenId);
   }
@@ -234,6 +232,17 @@ contract Calendar is IERC809, Pausable, ERC721Enumerable, ERC721URIStorage {
   returns (uint256)
   {
     return startTimestampsMap[_tokenId].size();
+  }
+
+  /// @notice Count all reservations for an calendar
+  function reservationBalanceOfOwner(address owner)
+  public
+  view
+  returns (uint256)
+  {
+    Reservation reservation = Reservation(reservationContract);
+
+    return reservation.balanceOf(owner);
   }
 
   /// @notice Get reservation details for a calendar by index

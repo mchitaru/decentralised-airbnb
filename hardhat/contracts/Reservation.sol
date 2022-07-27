@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "./IERC809.sol";
 import "hardhat/console.sol";
 
-contract Reservation is Ownable, IERC809Child, ERC721Enumerable {
+contract Reservation is Ownable, IERC809Aux, ERC721Enumerable {
 
   mapping(uint256 => uint256) public calendarIds;
   mapping(uint256 => uint256) public startTimestamps;

@@ -237,6 +237,11 @@ describe("Calendar.sol", () => {
       (await calendar.reservationBalanceOf(1)).should.be.equal(ethers.BigNumber.from(1));
     });
 
+    it("return number of reservations for owner", async () => {
+      (await calendar.reservationBalanceOfOwner(renter1)).should.be.equal(ethers.BigNumber.from(3));
+      (await calendar.reservationBalanceOfOwner(renter2)).should.be.equal(ethers.BigNumber.from(1));
+    });
+
     it("return reservation details for a calendar", async () => {
       const [
         reservationId,
