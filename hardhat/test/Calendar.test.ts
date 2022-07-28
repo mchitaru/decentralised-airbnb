@@ -39,20 +39,27 @@ describe("Calendar.sol", () => {
       calendar = await contractFactory.deploy();
       
       await calendar.mint(URI);
+      await calendar.mint(URI);
     });
 
     it("requires stop time to be after start time", async () => {
-      calendar.reserve(0, 2000, 1000).should.be.rejectedWith(EVMRevert);
+      await calendar.reserve(0, 2000, 1000).should.be.rejectedWith(EVMRevert);
     });
 
-    it("limits the reservation duration to 8 hours", async () => {
-      const limit = 8 * 3600 * 1000;
-      calendar.reserve(0, 0, limit).should.be.fulfilled; // eslint-disable-line no-unused-expressions
-      calendar.reserve(0, 0, limit + 1).should.be.rejectedWith(EVMRevert);
+    it("limits the reservation duration to 168 hours", async () => {
+      const limit = 168 * 1000 * 3600;
+      await calendar.reserve(0, 0, limit).should.be.fulfilled; // eslint-disable-line no-unused-expressions
+      await calendar.reserve(1, 0, limit + 1).should.be.rejectedWith(EVMRevert);
     });
 
     it("maintains ownership of token to actual owner", async () => {
       (await calendar.ownerOf(0)).should.equal(owner);
+    });
+
+    it("only owner can burn a calendar", async () => {
+      
+      await calendar.connect(renter1Sig).burn(1).should.be.rejectedWith(EVMRevert);      
+      await calendar.burn(1).should.be.fulfilled;
     });
 
     it("lets renter reserve and gain access", async () => {
@@ -126,7 +133,7 @@ describe("Calendar.sol", () => {
 
       // reserve revert
       // TODO: check revert message once there is test utils support
-      calendar
+      await calendar
         .connect(renter2Sig)
         .reserve(0, 1000, 2000)
         .should.be.rejectedWith(EVMRevert);
@@ -163,21 +170,21 @@ describe("Calendar.sol", () => {
     });
 
     it("reverts if requestor doesn't own the reservation", async () => {
-      calendar
+      await calendar
         .connect(renter2Sig)
         .cancel(0, 1)
         .should.be.rejectedWith(EVMRevert);
     });
 
     it("reverts if the calendar id doesn't match", async () => {
-      calendar
+      await calendar
         .connect(renter1Sig)
         .cancel(1, 0)
         .should.be.rejectedWith(EVMRevert);
     });
 
     it("reverts if the calendar id doesn't exist", async () => {
-      calendar
+      await calendar
         .connect(renter1Sig)
         .cancel(2, 0)
         .should.be.rejectedWith(EVMRevert);
@@ -257,7 +264,7 @@ describe("Calendar.sol", () => {
     });
 
     it("reverts if the calendar request is out of bound", async () => {
-      calendar
+      await calendar
         .reservationOfCalendarByIndex(0, 3)
         .should.be.rejectedWith(EVMRevert);
     });

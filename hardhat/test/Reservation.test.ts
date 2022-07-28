@@ -50,7 +50,7 @@ describe("Reservation.sol", () => {
       .withArgs(nobody, 0, 0);     
 
       // token no longer exists
-      reservation.ownerOf(0).should.be.rejectedWith(EVMRevert);
+      await reservation.ownerOf(0).should.be.rejectedWith(EVMRevert);
     });
   });
 
@@ -97,10 +97,9 @@ describe("Reservation.sol", () => {
     });
 
     it("reserve", async () => {
-      reservation
-        .reserve(nobody, 0, 100, 200, {
-          from: nobody,
-        })
+      await reservation
+        .connect(nobodySig)
+        .reserve(nobody, 0, 100, 200)
         .should.be.rejectedWith(EVMRevert);
     });
 
@@ -110,10 +109,9 @@ describe("Reservation.sol", () => {
       // verify nobody owns the token now
       (await reservation.ownerOf(0)).should.equal(nobody);
 
-      reservation
-        .cancel(nobody, 0, {
-          from: nobody,
-        })
+      await reservation
+        .connect(nobodySig)
+        .cancel(nobody, 0)
         .should.be.rejectedWith(EVMRevert);
     });
   });

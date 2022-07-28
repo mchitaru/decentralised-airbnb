@@ -45,6 +45,8 @@ contract Reservation is Ownable, IERC809Aux, ERC721Enumerable {
   external
   onlyOwner()
   {
+    require(_owner == ownerOf(_tokenId), "Not allowed");
+
     super._burn(_tokenId);
 
     uint256 calendarId = calendarIds[_tokenId];

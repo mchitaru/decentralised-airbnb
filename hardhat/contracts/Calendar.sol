@@ -10,7 +10,7 @@ import "./Reservation.sol";
 import "./IERC809.sol";
 import "hardhat/console.sol";
 
-contract Calendar is IERC809, Pausable, ERC721Enumerable, ERC721URIStorage {
+contract Calendar is IERC809, Ownable, Pausable, ERC721Enumerable, ERC721URIStorage {
   using TreeMap for TreeMap.Map;
 
   // limit reservation duration to 7 days because we do not have spam protection yet
@@ -45,6 +45,7 @@ contract Calendar is IERC809, Pausable, ERC721Enumerable, ERC721URIStorage {
   function _burn(uint256 _tokenId)
   internal
   whenNotPaused()
+  onlyOwner()
     override(ERC721, ERC721URIStorage)
   {
     super._burn(_tokenId);
@@ -74,6 +75,7 @@ contract Calendar is IERC809, Pausable, ERC721Enumerable, ERC721URIStorage {
   function burn(uint256 _tokenId)
   public
   whenNotPaused()
+  onlyOwner()
   {
     _burn(_tokenId);
   }
