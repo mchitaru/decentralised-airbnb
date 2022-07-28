@@ -1,23 +1,32 @@
-import React, { useState } from "react";
-// import { Icon } from "web3uikit";
-import { Link } from "react-router-dom";
-import { Button, Box, useMediaQuery } from "@mui/material";
+import React, { useState, useContext } from "react";
+import { Box, useMediaQuery } from "@mui/material";
 import LoadingButton from "@mui/lab/LoadingButton";
 import placeholder from "../images/placeholder.png";
+import { withSnackbar } from "../components/Snackbar";
 
-const TripDetails = ({ trip, cancelBooking, isMobile }) => {
-  const isSmall = useMediaQuery("(max-width:420px)");
+import { userContext } from "../Context";
+import { cancelBooking } from "../utils"
 
-  const [loading, setLoading] = useState(false);
+const TripDetails = ({ trip, isMobile, ShowMessage }) => {
 
   async function onCancelClick(){
 
     setLoading(true);
 
-    await cancelBooking(trip.place.token, trip.token);
+    const res = await cancelBooking(trip.place.token, trip.token, provider);
+
+    if(res)
+      ShowMessage(`Sad to see you're not going to ${trip.place.location_string} anymore!!`, "success");
+    else
+      ShowMessage("Sorry, but your booking could not be canceled!", "error");
 
     setLoading(false);
   }
+
+  const { provider } = useContext(userContext);
+  const [loading, setLoading] = useState(false);
+
+  const isSmall = useMediaQuery("(max-width:420px)");
 
   const styles = {
     rentalDivH: {
@@ -136,4 +145,4 @@ const TripDetails = ({ trip, cancelBooking, isMobile }) => {
   );
 };
 
-export default TripDetails;
+export default withSnackbar(TripDetails);

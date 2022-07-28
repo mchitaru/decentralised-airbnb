@@ -34,7 +34,7 @@ export const withSnackbar = WrappedComponent => {
 
     return (
       <>
-        <WrappedComponent {...props} snackbarShowMessage={showMessage} />
+        <WrappedComponent {...props} ShowMessage={showMessage} />
         <Snackbar
           anchorOrigin={{
             vertical: "bottom",

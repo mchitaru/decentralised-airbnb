@@ -1,8 +1,11 @@
 import React, { createContext, useState } from "react";
 
+export const userContext = createContext();
 export const searchFilterContext = createContext();
 
 const Context = ({ children }) => {
+  const [provider, setProvider] = useState(null);
+  const [account, setAccount] = useState(null);
   const [destination, setDestination] = useState("");
   const [checkIn, setCheckIn] = useState(
     new Date().toISOString().split("T")[0]
@@ -14,21 +17,31 @@ const Context = ({ children }) => {
   );
   //  const [destination,setDestination] = useState('')
   const [guests, setGuests] = useState(2);
+  
   return (
-    <searchFilterContext.Provider
+    <userContext.Provider 
       value={{
-        destination,
-        setDestination,
-        checkIn,
-        setCheckIn,
-        checkOut,
-        setCheckOut,
-        guests,
-        setGuests,
+        account, 
+        setAccount,
+        provider,
+        setProvider
       }}
     >
-      {children}
-    </searchFilterContext.Provider>
+      <searchFilterContext.Provider
+        value={{
+          destination,
+          setDestination,
+          checkIn,
+          setCheckIn,
+          checkOut,
+          setCheckOut,
+          guests,
+          setGuests,
+        }}
+      >
+        {children}
+      </searchFilterContext.Provider>
+    </userContext.Provider>
   );
 };
 

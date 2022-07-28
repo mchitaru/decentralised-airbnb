@@ -1,21 +1,49 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import LoadingButton from "@mui/lab/LoadingButton";
-import styled from "styled-components";
+import { withSnackbar } from "../components/Snackbar";
 import {
-  InputBase,
-  Rating,
-  TextField,
-  Typography,
   Box,
   Divider,
-  Container,
   useMediaQuery,
   Paper,
 } from "@mui/material";
 
-const ClaimDetails = ({account, provider, place, claimable, claimProperty, loading, setLoading}) => {
+import { userContext } from "../Context";
+import { claimProperty } from "../utils"
+
+const ClaimDetails = ({place, rentals, ShowMessage}) => {
+
+  async function onClick()
+  {
+    if(account != null){
+
+      setLoading(true);
+  
+      const res = await claimProperty(place, provider);  
+      
+      if(res)
+        ShowMessage(`Nice! You just tokenized your first property!!`, "success");
+      else
+        ShowMessage("Sorry, but this property could not be claimed!", "error");
+      
+      setClaimable(!res);
+
+      setLoading(false);
+    }  
+  }
+
+  const { account, provider } = useContext(userContext);
+  const [loading, setLoading] = useState(false);
+  const [claimable, setClaimable] = useState(false);
 
   let isMobile = useMediaQuery("(max-width:850px)");
+
+  useEffect(() => {
+
+    setClaimable(!rentals.find((otherPlace) => (otherPlace.latitude === place.latitude &&
+                                                otherPlace.longitude === place.longitude)));
+
+  }, [place, rentals])
 
 //***********************************   Styles *****************************************
 
@@ -89,7 +117,7 @@ const ClaimDetails = ({account, provider, place, claimable, claimProperty, loadi
       <LoadingButton
       loading={loading}
       disabled = {!claimable}
-      onClick={() => {claimProperty(place)}}
+      onClick={() => {onClick()}}
       variant="text"
       sx={{
           color: "#fff",
@@ -117,7 +145,7 @@ const ClaimDetails = ({account, provider, place, claimable, claimProperty, loadi
           fullWidth
           loading={loading}
           disabled = {!claimable}
-          onClick={() => {claimProperty(place)}}
+          onClick={() => {onClick()}}
           variant="text"
           sx={{
           color: "#fff",
@@ -135,4 +163,4 @@ const ClaimDetails = ({account, provider, place, claimable, claimProperty, loadi
   )
 }
 
-export default ClaimDetails;
+export default withSnackbar(ClaimDetails);

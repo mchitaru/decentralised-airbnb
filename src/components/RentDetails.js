@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import LoadingButton from "@mui/lab/LoadingButton";
+import { withSnackbar } from "../components/Snackbar";
 import styled from "styled-components";
 import {
   InputBase,
@@ -11,16 +12,35 @@ import {
   useMediaQuery,
   Paper,
 } from "@mui/material";
-import { searchFilterContext } from "../Context";
-import { ethers } from 'ethers'
+import { userContext, searchFilterContext } from "../Context";
+import { isRentalAvailable, bookRental } from "../utils"
 
-import {
-  calendarAddress
-} from '../artifacts/config' 
+const RentDetails = ({place, ShowMessage}) => {
 
-import Calendar from '../artifacts/contracts/Calendar.sol/Calendar.json'
+  async function onClick(){
 
-const RentDetails = ({account, provider, place, bookRental, loading, setLoading, available, setAvailable}) => {
+    if(account != null){
+
+      setLoading(true);
+    
+      const res = await bookRental(place, checkIn, checkOut, provider);
+
+      if(res)
+        ShowMessage(`Nice! You are going to ${place.location_string}!!`, "success");
+      else
+        ShowMessage("Sorry, but your booking could not be made!", "error");
+      
+      setAvailable(!res);
+
+      setLoading(false);
+
+      // navigate("/account");  
+    }
+  }
+
+  const { account, provider } = useContext(userContext);
+  const [available, setAvailable] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   let isMobile = useMediaQuery("(max-width:850px)");
   const { checkIn, setCheckIn, checkOut, setCheckOut, guests, setGuests } =
@@ -113,17 +133,8 @@ const RentDetails = ({account, provider, place, bookRental, loading, setLoading,
 
       if(provider){
 
-        try{
-
-          const contract = new ethers.Contract(calendarAddress, Calendar.abi, provider.getSigner());                
-          const available = await contract.isAvailable(place.token, (new Date(checkIn)).getTime(), (new Date(checkOut)).getTime());  
-          
-          setAvailable(available);  
-    
-        }catch(e){
-          setAvailable(false);
-          console.log("Copntract call error!");
-        }  
+        const res = await isRentalAvailable(place.token, (new Date(checkIn)).getTime(), (new Date(checkOut)).getTime(), provider);
+        setAvailable(res);
       }
     }
     fetchData();    
@@ -152,7 +163,7 @@ const RentDetails = ({account, provider, place, bookRental, loading, setLoading,
       <LoadingButton
       loading={loading}
       disabled = {!available}
-      onClick={() => {bookRental(place, checkIn, checkOut)}}
+      onClick={() => {onClick()}}
       variant="text"
       sx={{
           color: "#fff",
@@ -296,7 +307,7 @@ const RentDetails = ({account, provider, place, bookRental, loading, setLoading,
           fullWidth
           loading={loading}
           disabled = {!available}
-          onClick={() => {bookRental(place, checkIn, checkOut)}}
+          onClick={() => {onClick()}}
           variant="text"
           sx={{
           color: "#fff",
@@ -314,4 +325,4 @@ const RentDetails = ({account, provider, place, bookRental, loading, setLoading,
   )
 }
 
-export default RentDetails;
+export default withSnackbar(RentDetails);

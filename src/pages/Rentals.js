@@ -5,7 +5,7 @@ import mobileLogo from "../images/mobileLogoRed.png";
 import ReactLoading from "react-loading";
 import Map from "../components/Map";
 import PlaceDetails from "../components/PlaceDetails";
-import { searchFilterContext } from "../Context";
+import { userContext, searchFilterContext } from "../Context";
 import { Autocomplete } from "@react-google-maps/api";
 import {
   Box,
@@ -19,8 +19,6 @@ import PersonIcon from "@mui/icons-material/Person";
 import SwipeableEdgeDrawer from "../components/MobileDrawer";
 
 const Rentals = ({
-  account,
-  provider,
   loading,
   places,
   coordinates,
@@ -58,6 +56,8 @@ const Rentals = ({
     guests,
     setGuests,
   } = useContext(searchFilterContext);
+
+  const { account } = useContext(userContext);
   
   useEffect(() => {
     setDestination(JSON.parse(localStorage.getItem("destination")));

@@ -3,7 +3,6 @@ import RentDetails from "../components/RentDetails";
 import ClaimDetails from "../components/ClaimDetails";
 import Calendar from "../components/Calendar"
 import placeholder from "../images/placeholder.png";
-import { ethers } from "ethers";
 import {
   Rating,
   Typography,
@@ -14,7 +13,8 @@ import {
   IconButton,
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
-import React, { useState, useEffect } from "react";
+import React, { useContext } from "react";
+import { userContext } from "../Context";
 import { Link, useLocation } from "react-router-dom";
 import styled from "styled-components";
 
@@ -22,16 +22,14 @@ import logo from "../images/airbnbRed.png";
 import mobileLogo from "../images/mobileLogoRed.png";
 import { useNavigate } from "react-router-dom";
 
-import { create as ipfsHttpClient } from 'ipfs-http-client'
-import { withSnackbar } from "../components/Snackbar";
+const Details = ({rentals}) => {
 
-import {
-  calendarAddress
-} from '../artifacts/config' 
+  const StyledRating = styled(Rating)({
+    "& .MuiRating-iconFilled": {
+      color: "#EB4E5F",
+    },
+  });
 
-import CalendarABI from '../artifacts/contracts/Calendar.sol/Calendar.json'
-
-const Details = ({account, provider, places, snackbarShowMessage}) => {
   const rentalsList = {
     attributes: {
       unoDescription: "2 Guests • 2 Beds • 1 Rooms",
@@ -51,21 +49,11 @@ const Details = ({account, provider, places, snackbarShowMessage}) => {
     return window.location.pathname === '/property';
   }
 
-  let isMobile = useMediaQuery("(max-width:850px)");
-
-  const StyledRating = styled(Rating)({
-    "& .MuiRating-iconFilled": {
-      color: "#EB4E5F",
-    },
-  });
-
+  const { account, provider } = useContext(userContext);
   const navigate = useNavigate();
   const { state: place } = useLocation();
-  const [claimable, setClaimable] = useState(false);
-  const [available, setAvailable] = useState(false);
 
-  // const contractProcessor = useWeb3ExecuteFunction();
-
+  let isMobile = useMediaQuery("(max-width:850px)");
 
   //***********************************   Styles *****************************************
 
@@ -123,142 +111,7 @@ const Details = ({account, provider, places, snackbarShowMessage}) => {
     },
   };
 
-  useEffect(() => {
-
-    if(places){
-
-      setClaimable(places.find((otherPlace) => (otherPlace.latitude === place.latitude &&
-                                                  otherPlace.longitude === place.longitude)));
-    }
-
-  }, [place, places])
-
   // ****************** Connecting with Blockchain and functions **************************
-
-  async function uploadToIPFS(place) {
-
-    const data = JSON.stringify(place);
-
-    try {
-      const added = await client.add(data)
-      const url = `https://ipfs.infura.io/ipfs/${added.path}`
-      /* after metadata is uploaded to IPFS, return the URL to use it in the transaction */
-      return url
-    } catch (error) {
-      console.log('Error uploading file: ', error)
-    }  
-
-    return '';
-  }
-
-  const claimProperty = async (place) => {
-
-    if(account != null){
-
-      setLoading(true);
-
-      const url = uploadToIPFS(place);
-
-      // console.log(`Url: ${url}`);
-
-      try{
-
-        const contract = new ethers.Contract(calendarAddress, CalendarABI.abi, provider.getSigner());
-        const transaction = await contract.mint(url);
-        await transaction.wait();  
-
-        setClaimable(false);
-  
-      }catch(e){
-        console.log("Error during contract call!")
-      }
-      
-      setLoading(false);
-    }
-  }
-
-  const client = ipfsHttpClient('https://ipfs.infura.io:5001/api/v0');
-
-  const [loading, setLoading] = useState(false);
-  // const dispatch = useNotification();
-  // const handleSuccess = () => {
-  // //   dispatch({
-  // //     type: "success",
-  // //     message: `Nice! You are going to ${place.location_string}!!`,
-  // //     title: "Booking Succesful",
-  // //     position: "topR",
-  // //   });
-  // };
-  // const handleAccount = () => {
-  // //   dispatch({
-  // //     type: "error",
-  // //     message: "To book a rental you must connect a wallet",
-  // //     title: "Connect Your Wallet",
-  // //     position: "topR",
-  // //   });
-  // };
-
-  // const handleError = (msg) => {
-  //   // dispatch({
-  //   //   type: "error",
-  //   //   message: `${msg}`,
-  //   //   title: "Booking Failed",
-  //   //   position: "topR",
-  //   // });
-  // };
-
-  const cancelBooking = async (reservationId) => {
-
-    if(account != null){
-
-      setLoading(true);
-
-      try{
-
-        const contract = new ethers.Contract(calendarAddress, CalendarABI.abi, provider.getSigner());
-
-        const transaction = await contract.cancel(place.token, reservationId);
-        await transaction.wait();  
-
-      }catch(e){
-        console.log("Error during contract call!")
-      }
-      
-      setLoading(false);
-
-      // navigate("/account");
-    }
-  };
-
-  const bookRental = async (place, checkIn, checkOut) => {
-
-    if(account != null){
-
-      setLoading(true);
-
-      try{
-
-        const contract = new ethers.Contract(calendarAddress, CalendarABI.abi, provider.getSigner());
-
-        const transaction = await contract.reserve(place.token, (new Date(checkIn)).getTime(), (new Date(checkOut)).getTime());
-        const receipt = await transaction.wait();  
-
-        if(receipt.status === 1)
-          snackbarShowMessage(`Nice! You are going to ${place.location_string}!!`, "success");
-        else
-          snackbarShowMessage("Booking Failed", "error");
-        
-        setAvailable(false);
-
-      }catch(e){
-        console.log("Error during contract call!")
-      }
-      
-      setLoading(false);
-
-      // navigate("/account");
-    }
-  };
 
   return (
     <Box>
@@ -414,28 +267,17 @@ const Details = ({account, provider, places, snackbarShowMessage}) => {
           account={account}
           provider={provider}
           place={place}
-          bookRental={bookRental}
-          loading={loading}
-          setLoading={setLoading}
-          available={available}
-          setAvailable={setAvailable}
         />) ||
         (isClaim() &&
         <ClaimDetails 
-          account={account}
-          provider={provider}
           place={place}
-          claimable={claimable}
-          claimProperty={claimProperty}
-          loading={loading}
-          setLoading={setLoading}
+          rentals={rentals}
         />)||
         (isProperty() &&
         <Calendar 
           account={account}
           provider={provider}
           place={place}
-          cancelBooking={cancelBooking}
         />)}
         </Box>
       </Container>
@@ -443,4 +285,4 @@ const Details = ({account, provider, places, snackbarShowMessage}) => {
   );
 };
 
-export default withSnackbar(Details);
+export default Details;

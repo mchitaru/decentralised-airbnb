@@ -1,57 +1,18 @@
 import React, { useContext, useEffect, useState } from "react";
+import { withSnackbar } from "../components/Snackbar";
 import FullCalendar from '@fullcalendar/react' // must go before plugins
 import dayGridPlugin from '@fullcalendar/daygrid' // a plugin!
 import listViewPlugin from '@fullcalendar/list' // a plugin!
 import {
   Box,
   Menu,
-  MenuItem,
-  Tooltip
+  MenuItem
 } from "@mui/material";
 
-import { ethers } from 'ethers'
-import axios from 'axios'
+import { userContext } from "../Context";
+import { getBookingsByCalendar, cancelBooking } from "../utils"
 
-import {
-  calendarAddress
-} from '../artifacts/config' 
-
-import CalendarABI from '../artifacts/contracts/Calendar.sol/Calendar.json'
-
-
-const Calendar = ({account, provider, place, cancelBooking}) => {
-
-  const [eventId, setEventId] = useState(null);
-  const [events, setEvents] = useState([]);
-  const [contextMenu, setContextMenu] = useState(null);
-
-  const handleContextMenu = (ev) => {
-
-    if(eventId){
-      ev.preventDefault();
-      setContextMenu(
-        contextMenu === null
-          ? {
-              mouseX: ev.clientX + 2,
-              mouseY: ev.clientY - 6,
-            }
-          : // repeated contextmenu when it is already open closes it with Chrome 84 on Ubuntu
-            // Other native context menus might behave different.
-            // With this behavior we prevent contextmenu from the backdrop to re-locale existing context menus.
-            null,
-      );  
-    }
-  };
-
-  async function handleCancel() {
-
-    if(cancelBooking){
-
-      await cancelBooking(eventId);      
-    }    
-
-    handleClose();
-  };
+const Calendar = ({place, ShowMessage}) => {
 
   function handleClose() {
 
@@ -65,7 +26,7 @@ const Calendar = ({account, provider, place, cancelBooking}) => {
        hash = str.charCodeAt(i) + ((hash << 5) - hash);
     }
     return hash;
-} 
+  } 
 
   function intToRGB(i){
       var c = (i & 0x00FFFFFF)
@@ -87,46 +48,72 @@ const Calendar = ({account, provider, place, cancelBooking}) => {
     info.el.style.border = '0px solid black';
   }
 
-  useEffect(async () => {
+  const handleContextMenu = (ev) => {
 
-    if(account){
-
-      try{
-
-        const contract = new ethers.Contract(calendarAddress, CalendarABI.abi, provider.getSigner());     
-        const balance = ethers.utils.formatUnits(await contract.reservationBalanceOf(place.token), 0);
-  
-        let tokens = [];
-  
-        for(let i = 0; i < balance; i++){
-  
-          const {reservationId, startTime, stopTime, owner} = await contract.reservationOfCalendarByIndex(place.token, i);
-  
-          const tokenURI = await contract.tokenURI(place.token);
-          const meta = await axios.get(tokenURI);
-  
-          const checkIn = Number(ethers.utils.formatUnits(startTime, 0));
-          const checkOut = Number(ethers.utils.formatUnits(stopTime, 0));
-  
-          tokens.push({
-            id: reservationId,
-            title: owner.slice(0, 6).concat('...'),
-            start: new Date(checkIn).toISOString(), 
-            end: new Date(checkOut).toISOString(), 
-            allDay: true, 
-            color: intToRGB(hashCode(account)), 
-            display: 'background'
-          });
-        }
-  
-        // console.log(tokens);
-  
-        setEvents(tokens);  
-      
-      }catch(e){
-        console.log("Contract call error!");
-      }
+    if(eventId){
+      ev.preventDefault();
+      setContextMenu(
+        contextMenu === null
+          ? {
+              mouseX: ev.clientX + 2,
+              mouseY: ev.clientY - 6,
+            }
+          : // repeated contextmenu when it is already open closes it with Chrome 84 on Ubuntu
+            // Other native context menus might behave different.
+            // With this behavior we prevent contextmenu from the backdrop to re-locale existing context menus.
+            null,
+      );  
     }
+  };
+
+  async function onClick() {
+
+    setLoading(true);
+
+    const res = await cancelBooking(place.token, eventId);
+
+    if(res)
+      ShowMessage(`Sad to see you're not going to ${place.location_string} anymore!!`, "success");
+    else
+      ShowMessage("Sorry, but your booking could not be canceled", "error");
+
+    setLoading(false);
+
+    handleClose();
+  }
+
+  const { account, provider } = useContext(userContext);
+
+  const [loading, setLoading] = useState(false);
+  const [eventId, setEventId] = useState(null);
+  const [events, setEvents] = useState([]);
+  const [contextMenu, setContextMenu] = useState(null);
+
+  useEffect(() => {
+    async function fetch(){
+
+      if(account){
+
+        const bookings = await getBookingsByCalendar(place.token, provider);
+  
+        const evts = bookings.map((book) => (
+          {
+            id: book.token,
+            title: book.owner.slice(0, 6).concat('...'),
+            start: new Date(book.checkIn).toISOString(), 
+            end: new Date(book.checkOut).toISOString(), 
+            allDay: true, 
+            color: intToRGB(hashCode(book.owner)), 
+            display: 'background'
+          }
+        ))
+  
+        // console.log(evts);  
+        setEvents(evts);  
+      }  
+    }
+
+    fetch();
 
   }, [account, place, contextMenu]);
 
@@ -174,10 +161,10 @@ const Calendar = ({account, provider, place, cancelBooking}) => {
             : undefined
         }
       >
-        <MenuItem onClick={handleCancel}>Cancel</MenuItem>
+        <MenuItem onClick={() => {onClick()}}>Cancel</MenuItem>
       </Menu>      
     </Box>
   )
 }
 
-export default Calendar;
+export default withSnackbar(Calendar);

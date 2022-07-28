@@ -18,6 +18,14 @@ import TripDetails from "../components/TripDetails";
 import logo from "../images/airbnbRed.png";
 import mobileLogo from "../images/mobileLogoRed.png";
 
+import { ethers } from 'ethers'
+
+import {
+  contractAddress
+} from '../artifacts/config' 
+
+import Calendar from '../artifacts/contracts/Calendar.sol/Calendar.json'
+
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
 
@@ -51,7 +59,7 @@ function a11yProps(index) {
   };
 }
 
-export default function Account({account, provider, trips, properties, loading, cancelBooking}) {
+export default function Account({trips, properties, loading}) {
 
   let isMobile = useMediaQuery("(max-width:850px)");
   const styles = {
@@ -129,7 +137,6 @@ export default function Account({account, provider, trips, properties, loading, 
                       <TripDetails
                         trip={trip}
                         isMobile={isMobile}
-                        cancelBooking={cancelBooking}
                       />
                     </Box>              
                   </Box>              

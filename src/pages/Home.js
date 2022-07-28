@@ -4,7 +4,6 @@ import bg from "../images/homeBg.jpg";
 import mobileLogo from "../images/mobileWhiteLogo.png";
 import logo from "../images/airbnb.png";
 import SearchIcon from "@mui/icons-material/Search";
-// import { ConnectButton } from "web3uikit";
 import { Autocomplete } from "@react-google-maps/api";
 import {
   Box,
@@ -14,11 +13,10 @@ import {
   useMediaQuery,
   IconButton,
 } from "@mui/material";
-import { searchFilterContext } from "../Context";
+import { userContext, searchFilterContext } from "../Context";
 import PersonIcon from "@mui/icons-material/Person";
-// import { useMoralis } from "react-moralis";
 
-const Home = ({ account, provider, onLoad, onPlaceChanged }) => {
+const Home = ({ onLoad, onPlaceChanged }) => {
   let isMedium = useMediaQuery("(max-width:900px)");
   let isMobile = useMediaQuery("(max-width:750px)");
 
@@ -31,6 +29,8 @@ const Home = ({ account, provider, onLoad, onPlaceChanged }) => {
     guests,
     setGuests,
   } = useContext(searchFilterContext);
+
+  const { account } = useContext(userContext);
 
   localStorage.setItem("destination", JSON.stringify(destination));
   localStorage.setItem("checkIn", checkIn);
