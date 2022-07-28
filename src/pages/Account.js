@@ -80,6 +80,7 @@ export default function Account() {
   const [loading, setLoading] = useState(false);
   const [properties, setProperties] = useState([]);
   const [trips, setTrips] = useState([]);
+  const [tripsBalance, setTripsBalance] = useState(null);
 
   const handleChange = (event, newValue) => {
 
@@ -108,7 +109,7 @@ export default function Account() {
     }
   
     fetchData();
-  }, [account, provider])
+  }, [account, provider, tripsBalance])
 
   return (
     <Box sx={{ width: '100%' }}>
@@ -158,6 +159,7 @@ export default function Account() {
                     <Box>
                       <TripDetails
                         trip={trip}
+                        setTripsBalance={setTripsBalance}
                         isMobile={isMobile}
                       />
                     </Box>              

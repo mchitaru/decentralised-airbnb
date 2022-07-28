@@ -5,9 +5,9 @@ import placeholder from "../images/placeholder.png";
 import { withSnackbar } from "../components/Snackbar";
 
 import { userContext } from "../Context";
-import { cancelBooking } from "../utils"
+import { getTripsBalance, cancelBooking } from "../utils"
 
-const TripDetails = ({ trip, isMobile, ShowMessage }) => {
+const TripDetails = ({ trip, setTripsBalance, isMobile, ShowMessage }) => {
 
   async function onCancelClick(){
 
@@ -19,6 +19,8 @@ const TripDetails = ({ trip, isMobile, ShowMessage }) => {
       ShowMessage(`Sad to see you're not going to ${trip.place.location_string} anymore!!`, "success");
     else
       ShowMessage("Sorry, but your booking could not be canceled!", "error");
+
+    setTripsBalance(getTripsBalance());
 
     setLoading(false);
   }
