@@ -23,6 +23,7 @@ import mobileLogo from "../images/mobileLogoRed.png";
 import { useNavigate } from "react-router-dom";
 
 import { create as ipfsHttpClient } from 'ipfs-http-client'
+import { withSnackbar } from "../components/Snackbar";
 
 import {
   calendarAddress
@@ -30,7 +31,7 @@ import {
 
 import CalendarABI from '../artifacts/contracts/Calendar.sol/Calendar.json'
 
-const Details = ({account, provider, places}) => {
+const Details = ({account, provider, places, snackbarShowMessage}) => {
   const rentalsList = {
     attributes: {
       unoDescription: "2 Guests • 2 Beds • 1 Rooms",
@@ -240,8 +241,13 @@ const Details = ({account, provider, places}) => {
         const contract = new ethers.Contract(calendarAddress, CalendarABI.abi, provider.getSigner());
 
         const transaction = await contract.reserve(place.token, (new Date(checkIn)).getTime(), (new Date(checkOut)).getTime());
-        await transaction.wait();  
+        const receipt = await transaction.wait();  
 
+        if(receipt.status === 1)
+          snackbarShowMessage(`Nice! You are going to ${place.location_string}!!`, "success");
+        else
+          snackbarShowMessage("Booking Failed", "error");
+        
         setAvailable(false);
 
       }catch(e){
@@ -437,4 +443,4 @@ const Details = ({account, provider, places}) => {
   );
 };
 
-export default Details;
+export default withSnackbar(Details);
