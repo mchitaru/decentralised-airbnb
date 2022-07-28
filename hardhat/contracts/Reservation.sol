@@ -41,11 +41,11 @@ contract Reservation is Ownable, IERC809Aux, ERC721Enumerable {
     return tokenId;
   }
 
-  function cancel(address _owner, uint256 _tokenId)
+  function cancel(address _sender, uint256 _tokenId)
   external
   onlyOwner()
   {
-    require(_owner == ownerOf(_tokenId), "Not allowed");
+    require(_sender == ownerOf(_tokenId), "Not allowed");
 
     super._burn(_tokenId);
 
@@ -54,6 +54,6 @@ contract Reservation is Ownable, IERC809Aux, ERC721Enumerable {
     delete startTimestamps[_tokenId];
     delete stopTimestamps[_tokenId];
 
-    emit Cancellation(_owner, calendarId, _tokenId);
+    emit Cancellation(_sender, calendarId, _tokenId);
   }
 }

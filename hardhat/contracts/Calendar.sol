@@ -45,9 +45,10 @@ contract Calendar is IERC809, Ownable, Pausable, ERC721Enumerable, ERC721URIStor
   function _burn(uint256 _tokenId)
   internal
   whenNotPaused()
-  onlyOwner()
     override(ERC721, ERC721URIStorage)
   {
+    require(msg.sender == ownerOf(_tokenId), "Not allowed");
+
     super._burn(_tokenId);
   } 
 
@@ -75,8 +76,9 @@ contract Calendar is IERC809, Ownable, Pausable, ERC721Enumerable, ERC721URIStor
   function burn(uint256 _tokenId)
   public
   whenNotPaused()
-  onlyOwner()
   {
+    require(msg.sender == ownerOf(_tokenId), "Not allowed");
+
     _burn(_tokenId);
   }
 
