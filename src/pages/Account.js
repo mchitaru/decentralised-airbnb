@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React from "react";
+import React, { useEffect, useState, useContext } from "react";
 import {
   Box,
   Container,
@@ -17,14 +17,8 @@ import TripDetails from "../components/TripDetails";
 
 import logo from "../images/airbnbRed.png";
 import mobileLogo from "../images/mobileLogoRed.png";
-
-import { ethers } from 'ethers'
-
-import {
-  contractAddress
-} from '../artifacts/config' 
-
-import Calendar from '../artifacts/contracts/Calendar.sol/Calendar.json'
+import { getProperties, getTrips } from "../utils"
+import { userContext } from "../Context";
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -59,7 +53,7 @@ function a11yProps(index) {
   };
 }
 
-export default function Account({trips, properties, loading}) {
+export default function Account() {
 
   let isMobile = useMediaQuery("(max-width:850px)");
   const styles = {
@@ -80,13 +74,41 @@ export default function Account({trips, properties, loading}) {
   const activeTab = localStorage.getItem("account-tabs");
 
   const navigate = useNavigate();
-  const [value, setValue] = React.useState(activeTab?Number(activeTab):0);
+
+  const { account, provider } = useContext(userContext);
+  const [value, setValue] = useState(activeTab?Number(activeTab):0);
+  const [loading, setLoading] = useState(false);
+  const [properties, setProperties] = useState([]);
+  const [trips, setTrips] = useState([]);
 
   const handleChange = (event, newValue) => {
 
     setValue(newValue);
     localStorage.setItem("account-tabs", newValue);
   };
+
+  useEffect(() => {
+
+    async function fetchData() {
+
+      if(account){
+    
+        setLoading(true);
+
+        console.log('loading properties...');
+        const _properties = await getProperties(account, provider);
+        setProperties(_properties.length?_properties:null);
+
+        console.log('loading trips...');
+        const _trips = await getTrips(account, provider);
+        setTrips(_trips.length?_trips:null);
+
+        setLoading(false);
+      }
+    }
+  
+    fetchData();
+  }, [account, provider])
 
   return (
     <Box sx={{ width: '100%' }}>

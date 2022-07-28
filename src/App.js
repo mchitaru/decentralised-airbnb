@@ -7,7 +7,7 @@ import Account from "./pages/Account";
 import { getData } from "./api";
 import Details from "./pages/Details";
 import { userContext, searchFilterContext } from "./Context";
-import { getProperties, getTrips, getRentals, checkBound } from "./utils"
+import { getRentals, checkBound } from "./utils"
 
 import { ethers } from 'ethers'
 import Web3Modal from "web3modal" 
@@ -16,8 +16,6 @@ const App = () => {
   const [bound, setBound] = useState({});
   const [places, setPlaces] = useState([]);
   const [rentals, setRentals] = useState([]);
-  const [properties, setProperties] = useState([]);
-  const [trips, setTrips] = useState([]);
 
   const [coordinates, setCoordinates] = useState({});
   const [autocomplete, setAutocomplete] = useState(null);
@@ -89,30 +87,6 @@ const App = () => {
     fetchData();
 
   }, []);
-
-  useEffect(() => {
-
-    async function fetchData() {
-
-      if(account){
-    
-        setLoading(true);
-
-        console.log('loading properties...');
-        const _properties = await getProperties(account, provider);
-        setProperties(_properties.length?_properties:null);
-
-        console.log('loading trips...');
-        const _trips = await getTrips(account, provider);
-        setTrips(_trips.length?_trips:null);
-
-        setLoading(false);
-      }
-    }
-  
-    fetchData();
-
-  }, [account, provider]);
 
   useEffect(() => {
     
@@ -194,16 +168,7 @@ const App = () => {
         <Route path="/details" element={<Details />} />
         <Route path="/claim" element={<Details rentals={rentals} />} />
         <Route path="/property" element={<Details />} />
-        <Route 
-          path="/account" 
-          element={
-            <Account 
-              trips={trips}
-              properties={properties}
-              loading={loading}
-            />
-          } 
-        />
+        <Route path="/account" element={<Account />} />
       </Routes>
   );
 };

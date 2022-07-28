@@ -84,6 +84,23 @@ const getBookingsByCalendar = async (calendarId, provider) => {
   return bookings;
 }
 
+const getPropertiesBalance = async (address, provider) => {
+  
+  let balance = null;
+
+  try{
+
+    const contract = new ethers.Contract(contractAddress, contractAbi.abi, provider.getSigner());
+    balance = ethers.utils.formatUnits(await contract.balanceOf(address), 0);
+    
+  }catch(e){
+    console.log("Contract call error!");
+  }
+
+  return balance;
+}
+
+
 const getProperties = async (address, provider) => {
 
   let properties = [];
@@ -108,6 +125,23 @@ const getProperties = async (address, provider) => {
 
   return properties;
 }
+
+const getTripsBalance = async (address, provider) => {
+
+  let balance = null;
+
+  try{
+
+    const contract = new ethers.Contract(contractAddress, contractAbi.abi, provider.getSigner());  
+    balance = ethers.utils.formatUnits(await contract.reservationBalanceOfOwner(address), 0);
+
+  }catch(e){
+    console.log("Contract call error!");
+  }
+
+  return balance;
+}
+
 
 const getTrips = async (address, provider) => {
 
@@ -135,6 +169,22 @@ const getTrips = async (address, provider) => {
   }
 
   return trips;
+}
+
+const getRentalsBalance = async (bound, provider) => {
+
+  let balance = null;
+
+  try{
+
+    const contract = new ethers.Contract(contractAddress, contractAbi.abi, provider);
+    balance = ethers.utils.formatUnits(await contract.totalSupply(), 0);
+
+  }catch(e){
+    console.log("Contract call error!");
+  }
+
+  return balance;
 }
 
 const getRentals = async (bound, provider) => {
@@ -233,8 +283,11 @@ const cancelBooking = async  (calendarId, reservationId, provider) => {
 
 export {   
   isRentalAvailable, 
+  getPropertiesBalance, 
   getProperties, 
+  getTripsBalance,
   getTrips,
+  getRentalsBalance,
   getRentals,
   getBookingsByCalendar, 
   claimProperty, 
