@@ -2,6 +2,7 @@ import { HardhatUserConfig } from "hardhat/config";
 import "@nomiclabs/hardhat-ethers";
 import "@nomicfoundation/hardhat-toolbox";
 import "@nomicfoundation/hardhat-chai-matchers";
+import "hardhat-gas-reporter"
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -28,6 +29,10 @@ const config: HardhatUserConfig = {
   },
   paths: {
     artifacts: "../src/artifacts"
+  },
+  gasReporter: {
+    enabled: true,
+    coinmarketcap: 'd21cdc04-1ed2-45a4-95cf-95f9964d7c74'
   }
 };
 
