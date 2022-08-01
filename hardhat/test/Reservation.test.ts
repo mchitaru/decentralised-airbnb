@@ -36,14 +36,14 @@ describe("Reservation.sol", () => {
 
     it("reserve and emits Creation Event", async () => {
 
-      await expect(reservation.reserve(nobody, 0, 100, 200))
+      await expect(reservation.reserve(owner, nobody, 0, 100, 200))
       .to.emit(reservation, 'Creation')
       .withArgs(nobody, 0, 0);     
     });
 
     it("cancel and emits Cancellation Event", async () => {
 
-      await reservation.reserve(nobody, 0, 100, 200);
+      await reservation.reserve(owner, nobody, 0, 100, 200);
 
       await expect(reservation.cancel(nobody, 0))
       .to.emit(reservation, 'Cancellation')
@@ -62,29 +62,29 @@ describe("Reservation.sol", () => {
 
     it("incrementing the id every time", async () => {
 
-      await expect(reservation.reserve(nobody, 0, 100, 200))
+      await expect(reservation.reserve(owner, nobody, 0, 100, 200))
       .to.emit(reservation, 'Creation')
       .withArgs(nobody, 0, 0);     
 
-      await expect(reservation.reserve(nobody, 0, 400, 600))
+      await expect(reservation.reserve(owner, nobody, 0, 400, 600))
       .to.emit(reservation, 'Creation')
       .withArgs(nobody, 0, 1);     
 
-      await expect(reservation.reserve(owner, 0, 600, 800))
+      await expect(reservation.reserve(owner, owner, 0, 600, 800))
       .to.emit(reservation, 'Creation')
       .withArgs(owner, 0, 2);     
 
-      await expect(reservation.reserve(owner, 1, 600, 800))
+      await expect(reservation.reserve(owner, owner, 1, 600, 800))
       .to.emit(reservation, 'Creation')
       .withArgs(owner, 1, 3);     
 
     });
 
     it("not affected by cancellation", async () => {
-      await reservation.reserve(nobody, 0, 100, 200);
+      await reservation.reserve(owner, nobody, 0, 100, 200);
       await reservation.cancel(nobody, 0);
 
-      await expect(reservation.reserve(nobody, 0, 400, 600))
+      await expect(reservation.reserve(owner, nobody, 0, 400, 600))
       .to.emit(reservation, 'Creation')
       .withArgs(nobody, 0, 1);     
     });
@@ -99,12 +99,12 @@ describe("Reservation.sol", () => {
     it("reserve", async () => {
       await reservation
         .connect(nobodySig)
-        .reserve(nobody, 0, 100, 200)
+        .reserve(owner, nobody, 0, 100, 200)
         .should.be.rejectedWith(EVMRevert);
     });
 
     it("cancel", async () => {
-      await reservation.reserve(nobody, 0, 100, 200);
+      await reservation.reserve(owner, nobody, 0, 100, 200);
 
       // verify nobody owns the token now
       (await reservation.ownerOf(0)).should.equal(nobody);

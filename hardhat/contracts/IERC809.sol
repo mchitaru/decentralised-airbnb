@@ -32,6 +32,9 @@ interface IERC809Aux is IERC721Enumerable {
   /// @dev This emits when a successful reservation is made for accessing any NFT.
   event Creation(address indexed _renter, uint256 _calendarId, uint256 _tokenId);
 
+  /// @dev This emits when a successful reservation is made for accessing any NFT.
+  event Confirmation(address indexed _renter, uint256 _calendarId, uint256 _tokenId);
+
   /// @dev This emits when a successful cancellation is made for a reservation.
   event Cancellation(address indexed _renter, uint256 _calendarId, uint256 _tokenId);
 }

@@ -18,9 +18,8 @@ contract Calendar is IERC809, Ownable, Pausable, ERC721Enumerable, ERC721URIStor
 
   // mapping of token(calendar) id to mapping from start/end timestamp of a reservation to its id
   mapping(uint256 => TreeMap.Map) public startTimestampsMap;
-
-  // address of the ERC721 contract tokenizing reseravation/access of this contract's token
-  address public reservationContract;  
+  
+  address public reservationContract;  // address of the ERC721 contract tokenizing reseravation/access of this contract's token
 
   constructor() ERC721("Calendar", "CAL") {
     reservationContract = address(new Reservation());
@@ -65,10 +64,13 @@ contract Calendar is IERC809, Ownable, Pausable, ERC721Enumerable, ERC721URIStor
   function mint(string memory _tokenURI)
   public
   whenNotPaused()
+  returns(uint256)
   {
     uint256 _tokenId = totalSupply();
     super._mint(msg.sender, _tokenId);
     super._setTokenURI(_tokenId, _tokenURI);
+
+    return _tokenId;
   }
 
   /// @notice Destroy a calendar token
@@ -131,19 +133,29 @@ contract Calendar is IERC809, Ownable, Pausable, ERC721Enumerable, ERC721URIStor
   /// @notice Reserve access to token `_tokenId` from time `_start` to time `_stop`
   /// @dev A successful reservation must ensure each time slot in the range _start to _stop
   ///  is not previously reserved.
-  function reserve(uint256 _tokenId, uint256 _start, uint256 _stop)
+  function reserve(uint256 _tokenId, uint256 _start, uint256 _stop, uint256 _rate)
   public
+  payable
   whenNotPaused()
   returns(uint256)
   {
+    console.log("Msg value: %d", msg.value);
+
     require(_exists(_tokenId), "Calendar does not exist");
+    require(isAvailable(_tokenId, _start, _stop), "Token is unavailable during this time period");
 
-    if (!isAvailable(_tokenId, _start, _stop)) {
-      revert("Token is unavailable during this time period");
-    }
-
+    uint256 nights = SafeMath.div(SafeMath.sub(_stop,_start), SafeMath.mul(24 hours, 1000));
+    uint256 value = SafeMath.mul(_rate, nights);
+    console.log("Value: %d", value);
+    require(msg.value >= value, "The amount is too low");
+    
     Reservation reservation = Reservation(reservationContract);
-    uint256 reservationId = reservation.reserve(msg.sender, _tokenId, _start, _stop);
+    uint256 reservationId = reservation.reserve{value: msg.value}(ownerOf(_tokenId), 
+                                                                  msg.sender, 
+                                                                  _tokenId, 
+                                                                  _start, 
+                                                                  _stop);
+
     startTimestampsMap[_tokenId].put(_start, reservationId);
 
     return reservationId;

@@ -14,7 +14,7 @@ const config: HardhatUserConfig = {
       },
     },
   }, 
-  // defaultNetwork: "ganache",
+  defaultNetwork: "hardhat",
   networks: {
     hardhat: {
       chainId: 31337

@@ -247,15 +247,20 @@ const bookRental = async (place, checkIn, checkOut, provider) => {
 
   try{
 
+    const price = ethers.utils.parseEther((Number(place.rating) / 50).toString()); //TO DO: real price
+
     const contract = new ethers.Contract(contractAddress, contractAbi.abi, provider.getSigner());
 
-    const transaction = await contract.reserve(place.token, (new Date(checkIn)).getTime(), (new Date(checkOut)).getTime());
+    const transaction = await contract.reserve(place.token, 
+                                              (new Date(checkIn)).getTime(), 
+                                              (new Date(checkOut)).getTime(), 
+                                              price, {value: price});
     const receipt = await transaction.wait();  
 
     res = (receipt.status === 1);
 
   }catch(e){
-    console.log("Contract call error!");
+    console.log("Contract call error: " + e);
   }
 
   return res;
