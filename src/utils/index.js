@@ -274,8 +274,6 @@ const cancelBooking = async  (calendarId, reservationId, provider) => {
 
     const contract = new ethers.Contract(contractAddress, contractAbi.abi, provider.getSigner());
 
-    console.log(calendarId);
-    console.log(reservationId);
     const transaction = await contract.cancel(calendarId, reservationId);
     const receipt = await transaction.wait();  
 
