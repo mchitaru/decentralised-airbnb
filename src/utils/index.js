@@ -161,7 +161,7 @@ const getTrips = async (address, provider) => {
       const checkIn = Number(ethers.utils.formatUnits(startTime, 0));
       const checkOut = Number(ethers.utils.formatUnits(stopTime, 0));
 
-      trips.push({place: meta.data, token: reservationId, checkIn: new Date(checkIn).toDateString(), checkOut: new Date(checkOut).toDateString()});  
+      trips.push({place: {token: calendarId, ...meta.data}, token: reservationId, checkIn: new Date(checkIn).toDateString(), checkOut: new Date(checkOut).toDateString()});  
     }
 
   }catch(e){
@@ -274,6 +274,8 @@ const cancelBooking = async  (calendarId, reservationId, provider) => {
 
     const contract = new ethers.Contract(contractAddress, contractAbi.abi, provider.getSigner());
 
+    console.log(calendarId);
+    console.log(reservationId);
     const transaction = await contract.cancel(calendarId, reservationId);
     const receipt = await transaction.wait();  
 
