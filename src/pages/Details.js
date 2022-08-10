@@ -13,7 +13,7 @@ import {
   IconButton,
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
-import React, { useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { userContext } from "../Context";
 import { Link, useLocation } from "react-router-dom";
 import styled from "styled-components";
@@ -51,10 +51,12 @@ const Details = ({rentals}) => {
 
   const { account, provider } = useContext(userContext);
   const navigate = useNavigate();
-  const { state: place } = useLocation();
+
+  const { state: defaultPlace } = useLocation();
+  const [ place, setPlace ] = useState(defaultPlace);
 
   let isMobile = useMediaQuery("(max-width:850px)");
-
+  
   //***********************************   Styles *****************************************
 
   const styles = {
