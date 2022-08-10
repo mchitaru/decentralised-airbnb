@@ -40,8 +40,8 @@ const ClaimDetails = ({place, rentals, ShowMessage}) => {
 
   useEffect(() => {
 
-    setClaimable(!rentals.find((otherPlace) => (otherPlace.latitude === place.latitude &&
-                                                otherPlace.longitude === place.longitude)));
+    setClaimable(!rentals.find((otherPlace) => (otherPlace.geometry.location.lat === place.geometry.location.lat &&
+                                                otherPlace.geometry.location.lng === place.geometry.location.lng)));
 
   }, [place, rentals])
 

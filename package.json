@@ -70,5 +70,6 @@
     "dirty-chai": "^2.0.1",
     "hardhat-gas-reporter": "^1.0.8",
     "ts-node": "^10.9.1"
-  }
+  },
+  "proxy": "https://maps.googleapis.com/maps/api/place"
 }

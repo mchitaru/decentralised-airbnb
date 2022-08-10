@@ -71,7 +71,7 @@ const Details = ({rentals}) => {
       mb: "0px",
     },
     image_div: {
-      marginTop: 4,
+      marginTop: 4
     },
     card: {
       padding: "1.5rem",
@@ -180,7 +180,7 @@ const Details = ({rentals}) => {
           <span
             style={{ color: "gray", marginLeft: "0.2rem", fontSize: "17px" }}
           >
-            ({place.num_reviews} reviews)
+            ({place.user_ratings_total} reviews)
           </span>
 
           <Box
@@ -190,14 +190,15 @@ const Details = ({rentals}) => {
               fontSize: "17px",
             }}
           >
-            {place.location_string.substr(0, 15)}
+            {place.vicinity}
           </Box>
         </Box>
 
         <Box sx={styles.image_div}>
           <img
-            style={{
-              width: "50rem",
+              style={{
+              backgroundColor: "rgba(0, 0, 0, 0.1)",
+              maxWidth: "50rem",
               maxHeight: "35rem",
               borderRadius: "15px",
               ...(isMobile && {
@@ -205,8 +206,8 @@ const Details = ({rentals}) => {
               }),
             }}
             src={
-              place.photo
-                ? place.photo.images.original.url
+              place.photos
+                ? place.photos[0]
                 : placeholder
             }
             alt="place"

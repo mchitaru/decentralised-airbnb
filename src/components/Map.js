@@ -32,7 +32,7 @@ const Map = ({
       onChildClick={(child) => setChildClicked(child)}
     >
       {places?.map((place, i) => (
-        <Box lat={Number(place.latitude)} lng={Number(place.longitude)} key={i}>
+        <Box lat={Number(place.geometry.location.lat)} lng={Number(place.geometry.location.lng)} key={i}>
           <Tooltip title={place.name} placement="top">
             <LocationOnTwoToneIcon
               sx={{

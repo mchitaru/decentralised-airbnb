@@ -53,7 +53,11 @@ const TripDetails = ({ trip, setTripsBalance, isMobile, ShowMessage }) => {
         flexDirection: "column",
       }),
     },
-    rentalImg: {
+    imageDiv: {
+      display: "flex",
+      justifyContent: "space-around",
+      overflow: "hidden",
+      backgroundColor: "rgba(0, 0, 0, 0.1)",
       height: "200px",
       minWidth: "300px",
       borderRadius: "20px",
@@ -66,6 +70,20 @@ const TripDetails = ({ trip, setTripsBalance, isMobile, ShowMessage }) => {
       ...(isSmall && {
         height: "200px",
       }),
+    },
+    rentalImg: {
+      height: "200px",
+      // minWidth: "300px",
+      // borderRadius: "20px",
+      // marginRight: "20px",
+      // ...(isMobile && {
+        // width: "100%",
+      //   m: 0,
+      //   height: "300px",
+      // }),
+      // ...(isSmall && {
+      //   height: "200px",
+      // }),
     },
     rentalInfo: {
       padding: "10px",
@@ -109,15 +127,17 @@ const TripDetails = ({ trip, setTripsBalance, isMobile, ShowMessage }) => {
   return (
     <Box>
       <Box sx={styles.rentalDiv}>
-        <img
-          style={styles.rentalImg}
-          src={
-            trip.place.photo
-              ? trip.place.photo.images.large.url
-              : placeholder
-          }
-          alt="place"
-        />
+        <Box sx={styles.imageDiv}>
+          <img
+            style={styles.rentalImg}
+            src={
+              trip.place.photos
+                ? trip.place.photos[0]
+                : placeholder
+            }
+            alt="place"
+          />
+        </Box>
         <Box sx={styles.rentalInfo}>
           <Box sx={styles.rentalTitle}>{trip.place.name}</Box>
           <Box sx={styles.rentalDesc}>

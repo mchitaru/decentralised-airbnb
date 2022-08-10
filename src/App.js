@@ -101,11 +101,12 @@ const App = () => {
         setRentals(_rentals);  
 
         console.log('loading places...');
-        getData(bound, "hotels").then((data) => {
+        getData(coordinates, bound, "hotels").then((data) => {
           setPlaces(data?.filter((place) => {
             return place.name &&
-              checkBound(place.latitude, place.longitude, bound) &&
-              (!_rentals.find((rental) => (rental.latitude === place.latitude && rental.longitude === place.longitude)))
+              checkBound(place.geometry.location.lat, place.geometry.location.lng, bound) &&
+              (!_rentals.find((rental) => (rental.geometry.location.lat === place.geometry.location.lat && 
+                                            rental.geometry.location.lng === place.geometry.location.lng)))
           }));
         });  
         
