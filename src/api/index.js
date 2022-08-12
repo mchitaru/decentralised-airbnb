@@ -18,8 +18,8 @@ async function fetchPhoto(ref){
       {
         params: {
           photo_reference: ref,
-          maxwidth: '1024',
-          maxheight: '1024',
+          maxwidth: '1600',
+          maxheight: '1600',
           key: process.env.REACT_APP_GOOGLE_MAP_API_KEY
         },
         headers: { },

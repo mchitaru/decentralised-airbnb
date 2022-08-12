@@ -13,7 +13,7 @@ import {
   IconButton,
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext } from "react";
 import { userContext } from "../Context";
 import { Link, useLocation } from "react-router-dom";
 import styled from "styled-components";
@@ -22,7 +22,7 @@ import logo from "../images/airbnbRed.png";
 import mobileLogo from "../images/mobileLogoRed.png";
 import { useNavigate } from "react-router-dom";
 
-const Details = ({rentals}) => {
+const Details = () => {
 
   const StyledRating = styled(Rating)({
     "& .MuiRating-iconFilled": {
@@ -274,7 +274,6 @@ const Details = ({rentals}) => {
         (isClaim() &&
         <ClaimDetails 
           place={place}
-          rentals={rentals}
         />)||
         (isProperty() &&
         <Calendar 

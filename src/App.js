@@ -103,10 +103,7 @@ const App = () => {
         console.log('loading places...');
         getData(coordinates, bound, "hotels").then((data) => {
           setPlaces(data?.filter((place) => {
-            return place.name &&
-              checkBound(place.geometry.location.lat, place.geometry.location.lng, bound) &&
-              (!_rentals.find((rental) => (rental.geometry.location.lat === place.geometry.location.lat && 
-                                            rental.geometry.location.lng === place.geometry.location.lng)))
+            return place.name && checkBound(place.geometry.location.lat, place.geometry.location.lng, bound)
           }));
         });  
         
@@ -167,7 +164,7 @@ const App = () => {
           }
         />
         <Route path="/details" element={<Details />} />
-        <Route path="/claim" element={<Details rentals={rentals} />} />
+        <Route path="/claim" element={<Details />} />
         <Route path="/property" element={<Details />} />
         <Route path="/account" element={<Account />} />
       </Routes>

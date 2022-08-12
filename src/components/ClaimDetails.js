@@ -11,7 +11,7 @@ import {
 import { userContext } from "../Context";
 import { claimProperty } from "../utils"
 
-const ClaimDetails = ({place, rentals, ShowMessage}) => {
+const ClaimDetails = ({place, ShowMessage}) => {
 
   async function onClick()
   {
@@ -37,13 +37,6 @@ const ClaimDetails = ({place, rentals, ShowMessage}) => {
   const [claimable, setClaimable] = useState(false);
 
   let isMobile = useMediaQuery("(max-width:850px)");
-
-  useEffect(() => {
-
-    setClaimable(!rentals.find((otherPlace) => (otherPlace.geometry.location.lat === place.geometry.location.lat &&
-                                                otherPlace.geometry.location.lng === place.geometry.location.lng)));
-
-  }, [place, rentals])
 
 //***********************************   Styles *****************************************
 

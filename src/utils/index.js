@@ -14,12 +14,16 @@ const checkBound = (lat, lng, bound) => {
     lng >= bound.sw_lng && lng <= bound.ne_lng);
 }
 
-async function uploadToIPFS(place) {
-
-  const data = JSON.stringify(place);
+async function uploadToIPFS(data) {
 
   try {
-    const added = await ipfsClient.add(data)
+    const added = await ipfsClient.add(
+      data,     
+      {
+        progress: (prog) => console.log(`received: ${prog}`)
+      }
+    )
+
     const url = `https://ipfs.infura.io/ipfs/${added.path}`
     /* after metadata is uploaded to IPFS, return the URL to use it in the transaction */
     return url;
@@ -225,7 +229,9 @@ const claimProperty = async (place, provider) => {
 
     const contract = new ethers.Contract(contractAddress, contractAbi.abi, provider.getSigner());
 
-    const url = await uploadToIPFS(place);
+    const data = JSON.stringify(place);
+
+    const url = await uploadToIPFS(data);
 
     // console.log(`Url: ${url}`);
 
