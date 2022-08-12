@@ -69,7 +69,7 @@ export const getData = async (coordinates, bound, type) => {
     //   }
     // )));
 
-    console.log(data);
+    // console.log(data);
 
     // if(data.length)
     //   download(JSON.stringify(data), 'data.json', 'text/plain');

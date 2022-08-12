@@ -5,6 +5,7 @@ import styled from "styled-components";
 import placeholder from "../images/placeholder.png";
 
 const PlaceDetails = ({ selected, place, refProp, isMobile }) => {
+
   const isSmall = useMediaQuery("(max-width:420px)");
   const rentalsList = {
     attributes: {
@@ -77,18 +78,17 @@ const PlaceDetails = ({ selected, place, refProp, isMobile }) => {
       }),
     },
     rentalImg: {
+      width: "300px",
       height: "200px",
-      // minWidth: "300px",
-      // borderRadius: "20px",
-      // marginRight: "20px",
-      // ...(isMobile && {
-        // width: "100%",
-      //   m: 0,
-      //   height: "300px",
-      // }),
-      // ...(isSmall && {
-      //   height: "200px",
-      // }),
+      ...(isMobile && {
+        width: "100%",
+        m: 0,
+        height: "300px",
+      }),
+      ...(isSmall && {
+        height: "200px",
+      }),
+      objectFit: "cover"
     },
     rentalInfo: {
       padding: "10px",
@@ -132,7 +132,7 @@ const PlaceDetails = ({ selected, place, refProp, isMobile }) => {
   return (
     <Box sx={{...(selected && styles.rentalDivH)}}>
       <Box sx={styles.rentalDiv}>
-        <Box sx={styles.imageDiv}>
+        <Box sx={styles.imageDiv}>          
           <img
             style={styles.rentalImg}
             src={

@@ -72,18 +72,9 @@ const TripDetails = ({ trip, setTripsBalance, isMobile, ShowMessage }) => {
       }),
     },
     rentalImg: {
+      width: "300px",
       height: "200px",
-      // minWidth: "300px",
-      // borderRadius: "20px",
-      // marginRight: "20px",
-      // ...(isMobile && {
-        // width: "100%",
-      //   m: 0,
-      //   height: "300px",
-      // }),
-      // ...(isSmall && {
-      //   height: "200px",
-      // }),
+      objectFit: "cover"
     },
     rentalInfo: {
       padding: "10px",

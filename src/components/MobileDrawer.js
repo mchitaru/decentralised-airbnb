@@ -34,8 +34,9 @@ const Puller = styled(Box)(({ theme }) => ({
 }));
 
 function SwipeableEdgeDrawer(props) {
+  
   const { window } = props;
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = React.useState(false); //drawer position
 
   const toggleDrawer = (newOpen) => () => {
     setOpen(newOpen);
@@ -44,7 +45,6 @@ function SwipeableEdgeDrawer(props) {
   // This is used only for the example
   const container =
     window !== undefined ? () => window().document.body : undefined;
-  console.log(props.places);
 
   const styles = {
     line2: {
@@ -77,8 +77,9 @@ function SwipeableEdgeDrawer(props) {
         open={open}
         onClose={toggleDrawer(false)}
         onOpen={toggleDrawer(true)}
+        onClick={toggleDrawer(!open)}
         swipeAreaWidth={drawerBleeding}
-        disableSwipeToOpen={false}
+        disableSwipeToOpen={true}
         ModalProps={{
           keepMounted: true,
         }}
@@ -92,6 +93,7 @@ function SwipeableEdgeDrawer(props) {
             visibility: "visible",
             right: 0,
             left: 0,
+            pointerEvents: "all"
           }}
         >
           <Puller />
@@ -100,6 +102,7 @@ function SwipeableEdgeDrawer(props) {
               variant={props.isMobile ? "subtitle1" : "h6"}
               sx={{ p: 3 }}
             >
+              <b>{props.places.length}</b>&nbsp;
               Stays Available For Your Destination
             </Typography>
           </center>
@@ -131,7 +134,7 @@ function SwipeableEdgeDrawer(props) {
             </Box>
           ) : (
             <>
-              {props.places?.map((place, i) => (
+              {props.places?.map((place, i) => (                
                 <Box key={i} ref={elRefs[i]}>
                   {i !== 0 && <hr style={styles.line2} />}
                   <PlaceDetails

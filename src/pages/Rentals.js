@@ -267,6 +267,7 @@ const Rentals = ({
                 />
               </Autocomplete>)}
               <Typography varient="body2" fontSize={15}>
+                <b>{places.length}</b>&nbsp;
                 {(isRentals() && "Stays Available For Your Destination") ||
                 (isClaims() && ("Properties Available To Claim"))}
               </Typography>
