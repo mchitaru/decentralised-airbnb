@@ -15,6 +15,12 @@ import {
 import { userContext, searchFilterContext } from "../Context";
 import { isRentalAvailable, bookRental } from "../utils"
 
+const StyledRating = styled(Rating)({
+  "& .MuiRating-iconFilled": {
+    color: "#EB4E5F",
+  },
+});
+
 const RentDetails = ({place, ShowMessage}) => {
 
   async function onClick(){
@@ -45,12 +51,6 @@ const RentDetails = ({place, ShowMessage}) => {
   let isMobile = useMediaQuery("(max-width:850px)");
   const { checkIn, setCheckIn, checkOut, setCheckOut, guests, setGuests } =
     useContext(searchFilterContext);
-
-  const StyledRating = styled(Rating)({
-    "& .MuiRating-iconFilled": {
-      color: "#EB4E5F",
-    },
-  });
 
 //***********************************   Styles *****************************************
 

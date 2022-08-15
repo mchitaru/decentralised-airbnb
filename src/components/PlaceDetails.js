@@ -4,6 +4,12 @@ import { Rating, Button, Box, useMediaQuery } from "@mui/material";
 import styled from "styled-components";
 import placeholder from "../images/placeholder.png";
 
+const StyledRating = styled(Rating)({
+  "& .MuiRating-iconFilled": {
+    color: "#EB4E5F",
+  },
+});
+
 const PlaceDetails = ({ selected, place, refProp, isMobile }) => {
 
   const isSmall = useMediaQuery("(max-width:420px)");
@@ -29,12 +35,6 @@ const PlaceDetails = ({ selected, place, refProp, isMobile }) => {
   if (selected) {
     refProp?.current?.scrollIntoView({ behavior: "smooth", block: "center" });
   }
-
-  const StyledRating = styled(Rating)({
-    "& .MuiRating-iconFilled": {
-      color: "#EB4E5F",
-    },
-  });
 
   const styles = {
     rentalDivH: {
@@ -164,7 +164,7 @@ const PlaceDetails = ({ selected, place, refProp, isMobile }) => {
             <StyledRating
               name="read-only"
               size="small"
-              value={Number(place.rating)}
+              value={place.rating?Number(place.rating):0}
               readOnly
               precision={0.5}
             />
@@ -178,7 +178,7 @@ const PlaceDetails = ({ selected, place, refProp, isMobile }) => {
                   }),
                 }}
               >
-                {Number(place.rating)}
+                {place.rating?Number(place.rating):''}
               </span>
               <span
                 style={{
@@ -189,7 +189,7 @@ const PlaceDetails = ({ selected, place, refProp, isMobile }) => {
                   }),
                 }}
               >
-                ({place.num_reviews} reviews)
+                ({place.user_ratings_total?place.user_ratings_total:0} reviews)
               </span>
             </Box>
           </Box>

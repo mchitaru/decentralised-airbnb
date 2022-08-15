@@ -22,13 +22,13 @@ import logo from "../images/airbnbRed.png";
 import mobileLogo from "../images/mobileLogoRed.png";
 import { useNavigate } from "react-router-dom";
 
-const Details = () => {
+const StyledRating = styled(Rating)({
+  "& .MuiRating-iconFilled": {
+    color: "#EB4E5F",
+  },
+});
 
-  const StyledRating = styled(Rating)({
-    "& .MuiRating-iconFilled": {
-      color: "#EB4E5F",
-    },
-  });
+const Details = () => {
 
   const rentalsList = {
     attributes: {
@@ -166,7 +166,7 @@ const Details = () => {
         >
           <StyledRating
             name="read-only"
-            value={Number(place.rating)}
+            value={place.rating?Number(place.rating):0}
             readOnly
             precision={0.5}
             size="small"
@@ -177,12 +177,12 @@ const Details = () => {
               fontSize: "15px",
             }}
           >
-            {Number(place.rating)}
+            {place.rating?Number(place.rating):''}
           </span>
           <span
             style={{ color: "gray", marginLeft: "0.2rem", fontSize: "17px" }}
           >
-            ({place.user_ratings_total} reviews)
+            ({place.user_ratings_total?place.user_ratings_total:0} reviews)
           </span>
 
           <Box
