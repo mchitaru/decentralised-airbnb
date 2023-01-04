@@ -7,6 +7,8 @@ import Map from "../components/Map";
 import PlaceDetails from "../components/PlaceDetails";
 import { userContext, searchFilterContext } from "../Context";
 import { Autocomplete } from "@react-google-maps/api";
+import SearchIcon from "@mui/icons-material/Search";
+import { Button } from "@mui/material";
 import {
   Box,
   Divider,
@@ -24,11 +26,8 @@ const Rentals = ({
   coordinates,
   setCoordinates,
   setBound,
-  childClicked,
-  setChildClicked,
   autocomplete,
-  onLoad, 
-  onPlaceChanged 
+  onLoad
 }) => {
   const months = [
     "Jan",
@@ -59,6 +58,9 @@ const Rentals = ({
 
   const { account } = useContext(userContext);
   
+  const [elRefs, setElRefs] = useState([]);
+  const [childClicked, setChildClicked] = useState(null);
+
   useEffect(() => {
     setDestination(JSON.parse(localStorage.getItem("destination")));
     setCheckIn(localStorage.getItem("checkIn"));
@@ -67,7 +69,25 @@ const Rentals = ({
 
     return () => {};
   }, []);
-  const [elRefs, setElRefs] = useState([]);
+
+  useEffect(() => {
+
+    const place = places.findIndex((place) => {return (destination === place.vecinity)})
+
+    if(place >= 0)                                                      
+      setChildClicked(place);
+
+  }, [destination, places]);
+
+
+  const onPlaceChanged = () => {
+    console.log(autocomplete.getPlace());
+
+    const lat = autocomplete.getPlace().geometry.location.lat();
+    const lng = autocomplete.getPlace().geometry.location.lng();
+    setDestination(autocomplete.getPlace().formatted_address);
+    setCoordinates({ lat, lng });
+  };
 
   function isRentals() {
     return window.location.pathname === '/rentals';
@@ -180,6 +200,14 @@ const Rentals = ({
         zIndex: 0,
       }),
     },
+    inputs: {
+      fontSize: "12px",
+      fontWeight: "bold",
+      mt: "10px",
+      ...(isMobile && {
+        width: "80%",
+      }),
+    },
   };
 
   return (
@@ -204,7 +232,7 @@ const Rentals = ({
             />
           </Link>
         </Box>
-        {isRentals() &&
+        {(isRentals() &&
         <Box sx={styles.searchReminder}>
           <Typography varient="body1" sx={styles.filter}>
             {destination.split(",")[0]}
@@ -224,7 +252,42 @@ const Rentals = ({
           <Typography varient="body1" sx={styles.filter}>
             {guests} Guest
           </Typography>
-        </Box>}
+        </Box>) ||
+        (isClaims() &&
+        <Box sx={styles.searchReminder}>
+          <Box
+            style={{
+              marginTop: "-5px",
+              fontSize: "12px",
+              fontWeight: "bold",
+              display: "flex",
+              flexDirection: "column",
+              width: "100%",
+              ...(isMobile && {
+                width: "80%",
+              }),
+            }}
+          >
+            <Box sx={styles.inputs}>
+              Location
+              <Autocomplete onLoad={onLoad} onPlaceChanged={onPlaceChanged}>
+                <TextField
+                  variant="standard"
+                  autoFocus
+                  sx={{
+                    "&::placeholder": {
+                      color: "gray",
+                    },
+                  }}
+                  placeholder="What is the propery name or location?"
+                  fullWidth
+                  InputProps={{ disableUnderline: true }}
+                />
+              </Autocomplete>
+            </Box>
+          </Box>
+        </Box>)
+        }
         <Box display="flex">
           {/* <ConnectButton /> */}
           {(account && (
@@ -250,28 +313,6 @@ const Rentals = ({
           />
         ) : (
           <Box varient="body1" sx={styles.rentalsContentL}>
-            <Box>
-              {(isClaims() &&
-              <Autocomplete onLoad={onLoad} onPlaceChanged={onPlaceChanged}>
-                <TextField
-                  variant="standard"
-                  autoFocus
-                  sx={{
-                    "&::placeholder": {
-                      color: "gray",
-                    },
-                  }}
-                  placeholder="What are you looking for?"
-                  fullWidth
-                  InputProps={{ disableUnderline: true }}
-                />
-              </Autocomplete>)}
-              <Typography varient="body2" fontSize={15}>
-                <b>{places.length}</b>&nbsp;
-                {(isRentals() && "Stays Available For Your Destination") ||
-                (isClaims() && ("Properties Available To Claim"))}
-              </Typography>
-            </Box>
             {loading ? (
               <Box
                 style={{
@@ -311,6 +352,7 @@ const Rentals = ({
             setCoordinates={setCoordinates}
             destination={destination}
             setBound={setBound}
+            childClicked={childClicked}
             setChildClicked={setChildClicked}
           />
         </Box>

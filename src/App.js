@@ -20,7 +20,6 @@ const App = () => {
   const [coordinates, setCoordinates] = useState({});
   const [autocomplete, setAutocomplete] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [childClicked, setChildClicked] = useState(null);
 
   const { destination, setDestination } = useContext(searchFilterContext);
   const { account, setAccount, provider, setProvider } = useContext(userContext);
@@ -28,6 +27,9 @@ const App = () => {
   const onLoad = (autoC) => setAutocomplete(autoC);
 
   const onPlaceChanged = () => {
+
+    console.log(autocomplete.getPlace())
+    
     setDestination(autocomplete.getPlace().formatted_address);
     const lat = autocomplete.getPlace().geometry.location.lat();
     const lng = autocomplete.getPlace().geometry.location.lng();
@@ -135,13 +137,10 @@ const App = () => {
               autocomplete={autocomplete}
               bound={bound}
               setAutocomplete={setAutocomplete}
-              onPlaceChanged={onPlaceChanged}
               places={rentals}
               coordinates={coordinates}
               setCoordinates={setCoordinates}
               setBound={setBound}
-              childClicked={childClicked}
-              setChildClicked={setChildClicked}
             />
           }
         />
@@ -152,13 +151,10 @@ const App = () => {
               loading={loading}
               autocomplete={autocomplete}
               setAutocomplete={setAutocomplete}
-              onPlaceChanged={onPlaceChanged}
               places={places}
               coordinates={coordinates}
               setCoordinates={setCoordinates}
               setBound={setBound}
-              childClicked={childClicked}
-              setChildClicked={setChildClicked}
               onLoad={onLoad}
             />
           }

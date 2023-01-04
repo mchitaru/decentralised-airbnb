@@ -9,6 +9,7 @@ const Map = ({
   coordinates,
   setCoordinates,
   setBound,
+  childClicked,
   setChildClicked,
 }) => {
   return (
@@ -36,7 +37,8 @@ const Map = ({
           <Tooltip title={place.name} placement="top">
             <LocationOnTwoToneIcon
               sx={{
-                color: "#EB4E5F",
+                color: (childClicked == i)?"#1E4ECC":"#EB4E5F",
+                transform: (childClicked == i)?"scale(2)":"scale(1)",
                 transition: "transform 0.4s",
                 "&:hover": {
                   transform: "scale(1.3)",
