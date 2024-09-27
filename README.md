@@ -5,7 +5,6 @@
 
 ## Demo
 
-https://decentralised-airbnb.netlify.app/
 ![Screenshot from 2022-05-20 22-48-38](https://user-images.githubusercontent.com/69376775/169581095-7f08dec9-80ce-4745-a7e3-0393722badc9.png)
 
 ![Screenshot from 2022-05-20 22-51-35](https://user-images.githubusercontent.com/69376775/169581105-e4cd507e-55cd-4db1-a73c-522df7e06396.png)
